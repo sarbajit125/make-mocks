@@ -9,25 +9,48 @@ import { Posts, RequestType, TableMock } from "../../DTO/components";
 import Editor from "@monaco-editor/react";
 import ResponsiveAppBar from "../../components/navbar";
 import { ChangeEvent } from "react";
+import { useFormik } from 'formik';
+import * as yup from 'yup';
 
+const validationSchema = yup.object({
+    endpoint: yup.string(),
+    endpointTitle: yup.string().required('please add title of mock')
+})
 export default function Blog(props) {
     function handleTextfieldChange(event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) {
         
     }
+    const formik = useFormik({
+        initialValues: {
+            endpoint: props.isCreate ? "/" : props.post.endpoint,
+            endpointHTTP: props.isCreate? "POST": props.post.type,
+            endpointTitle: props.isCreate?"":props.post.title,
+            endpointDesc: props.isCreate ? "" : props.post.description,
+            endpointResp: props.isCreate ? "// some comments here" : props.post.response
+
+        },
+        validationSchema: validationSchema,
+        onSubmit: (values) => {console.log(JSON.stringify(values, null, 2))}
+    })
     return(
         <Paper>
             <ResponsiveAppBar />
+            <form onSubmit={formik.handleSubmit} onReset={formik.handleReset}>
             <Box sx={{display: 'flex', flexWrap: 'wrap', pt: 3, px: 1}}>
             <TextField fullWidth
              id="endpoint"
              label="Route path"
              variant="outlined"
              inputProps={{startAdornment: <InputAdornment position="start">/</InputAdornment>,}}
-             defaultValue = {props.isCreate? "":props.post.endpoint}
-             onChange = {event => {console.log(event.target.value)}} />
+             value={formik.values.endpoint}
+             onChange = {formik.handleChange} />
             </Box>
             <Box sx={{pt:3, px: 1}}>
-                <TextField id="endpointHTTP" select label="select" defaultValue={props.isCreate? "POST": props.post.type} helperText="Please select request type"  onChange={event=>{console.log(event.target.value)}}>
+                <TextField id="endpointHTTP"
+                 select label="select"
+                  value={formik.values.endpointHTTP}
+                   helperText="Please select request type"
+                     onChange={formik.handleChange}>
                     {
                         RequestType.map((request)=>(
                         <MenuItem key={request} value={request}>{request}</MenuItem>
@@ -40,35 +63,35 @@ export default function Blog(props) {
              fullWidth
              id="endpointTitle"
              label="Title of Mock"
-             defaultValue={props.isCreate?"":props.post.title}
-             onChange={event => {console.log(event.target.value)}}   />
+             value={formik.values.endpointTitle}
+             onChange={formik.handleChange}   />
             </Box>
             <Box sx={{pt:3, px: 1}}>   
             <TextField
              fullWidth
              id="endpointDesc"
              label = "Description of Mock"
-             defaultValue={props.isCreate ? "" : props.post.description}
-             onChange={event => {console.log(event.target.value)}} />
+             value={formik.values.endpointDesc}
+             onChange={formik.handleChange} />
             </Box>  
            <Box sx={{pt:3, px: 1 }} display="flex">
            <Editor height="80vh"
              defaultLanguage="json"
              defaultValue={props.isCreate ? "//some comments" : props.post.response}
              theme="vs-dark"
-             onChange={event => {console.log(event)}} />
+             onChange={formik.handleChange} />
            </Box>
             <Box sx={{pt:3, px: 1, pb:3}} alignItems="center" justifyContent="center" display="flex">  
-            <Button sx={{mr: 2, width: '20%'}}  variant="outlined" color="success"> Submit</Button>
-            <Button sx={{ width: '20%'}} variant="outlined" color="secondary"> Reset</Button>
-            </Box>         
+            <Button sx={{mr: 2, width: '20%'}}  variant="outlined" color="success" type="submit"> Submit</Button>
+            <Button sx={{ width: '20%'}} variant="outlined" color="secondary" type="reset"> Reset</Button>
+            </Box> 
+            </form>        
         </Paper>
     )
 }
 
 export async function getServerSideProps(context: { query: { id: any; }; }) {
     let pageId = context.query.id 
-    console.log(pageId)
     const data = TableMock[pageId]
     return {props: {post:JSON.parse(JSON.stringify(data)), isCreate: false}}
 
