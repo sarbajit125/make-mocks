@@ -29,6 +29,20 @@ export interface RouteDetails {
     type: string;
     response: string;
 }
+export enum ResponseStatus {
+    Success,
+    Failure,
+    Pending
+}
+
+export interface ResponseStruct extends SuccessResponse {
+    status: ResponseStatus;
+}
+export interface SuccessResponse {
+    serviceCode: number;
+    message: string;
+    timeStamp: string;
+}
 
 export interface ListProps {
     mocks: RouteDetails[]

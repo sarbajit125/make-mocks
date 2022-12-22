@@ -5,7 +5,7 @@ import InputAdornment from "@mui/material/InputAdornment";
 import MenuItem from "@mui/material/MenuItem";
 import Paper from "@mui/material/Paper";
 import TextField from "@mui/material/TextField";
-import { Posts, RequestType, TableMock } from "../../DTO/components";
+import { Posts, RequestType, ResponseStatus, ResponseStruct, RouteDetails, SuccessResponse, TableMock } from "../../DTO/components";
 import Editor from "@monaco-editor/react";
 import ResponsiveAppBar from "../../components/navbar";
 import { ChangeEvent, useState } from "react";
@@ -14,12 +14,13 @@ import * as yup from 'yup';
 import { v4 as uuidv4 } from 'uuid';
 import { Alert, Snackbar } from "@mui/material";
 import { useRouter } from 'next/router'
+import { timeStamp } from "console";
 
 const validationSchema = yup.object({
     endpoint: yup.string(),
     endpointTitle: yup.string().required('please add title of mock')
 })
-export default function Blog(props) {
+export default function Blog(props: { isCreate: boolean; post: RouteDetails; }) {
     const [open, setOpen] = useState(false);
     const router = useRouter()
     const formik = useFormik({
@@ -34,14 +35,34 @@ export default function Blog(props) {
         validationSchema: validationSchema,
         onSubmit: (values) => {
             if (props.isCreate) {
-                let newPost = new Posts(uuidv4(),values.endpointTitle,values.endpointDesc, values.endpoint, values.endpointHTTP, values.endpointResp)
-                TableMock.push(newPost)
+                let payload: RouteDetails = {
+                    id: uuidv4(),
+                    title: values.endpointTitle,
+                    description: values.endpointDesc,
+                    endpoint: values.endpoint,
+                    type: values.endpointHTTP,
+                    response: values.endpointResp
+                }
+                submitPost(props.isCreate, payload).then((response) => {
+                    if (response.status == ResponseStatus.Success) {
+                        setOpen(true)
+                    }
+                })
             } else {
-                let updatedPost = new Posts(props.post.id,values.endpointTitle,values.endpointDesc, values.endpoint, values.endpointHTTP, values.endpointResp)
-                const objIdx = TableMock.findIndex((obj) => obj.id == updatedPost.id)
-                TableMock[objIdx] = updatedPost
+                let payload: RouteDetails = {
+                    id: props.post.id,
+                    title: values.endpointTitle,
+                    description: values.endpointDesc,
+                    endpoint: values.endpoint,
+                    type: values.endpointHTTP,
+                    response: values.endpointResp
+                }
+                 submitPost(props.isCreate, payload).then((response) => {
+                    if (response.status == ResponseStatus.Success) {
+                        setOpen(true)
+                    }
+                 })
             }
-            setOpen(true)
         }
     })
     const handleClose = (event?: React.SyntheticEvent | Event, reason?: string) => {
@@ -115,10 +136,64 @@ export default function Blog(props) {
     )
 }
 
+async function submitPost(isCreate: boolean, mock:RouteDetails) : Promise<ResponseStruct> {
+    try {
+         if (isCreate) {
+         const res = await fetch(`http://localhost:3000/mocks`,{
+         method:'POST',
+         body: JSON.parse(JSON.stringify(mock))
+    })
+    const data = await res.json() as SuccessResponse
+    if (res.ok) {     
+        return {
+            status: ResponseStatus.Success,
+            timeStamp: data.timeStamp,
+            message: data.message,
+            serviceCode: data.serviceCode
+        }
+     } else {
+        return {
+            status: ResponseStatus.Failure,
+            timeStamp: "",
+            message: "Something went wrong",
+            serviceCode: 400
+        }
+     }
+    } else {
+        let body = (JSON.stringify(mock))
+        console.log(body)
+       const res = await fetch(`http://localhost:3000/mocks`, {
+        method:'PUT',
+        body: body
+       })
+       const data = await res.json() as SuccessResponse
+       if (res.ok) {
+        return {
+            status: ResponseStatus.Failure,
+            timeStamp: data.timeStamp,
+            message: data.message,
+            serviceCode: data.serviceCode
+        }
+       } else {
+        return {
+            status: ResponseStatus.Failure,
+            timeStamp: "",
+            message: "Something went wrong",
+            serviceCode: 400
+        }
+       }
+    }
+    } catch (error) {
+        console.log(error)
+        throw new Error("Something went wrong")
+    }
+}
+
 export async function getServerSideProps(context: { query: { id: string; isCreate: string; }; }) {
     let pageId = context.query.id 
-    const data = TableMock[pageId]
+   const res = await fetch(`http://localhost:3000/mocks/${pageId}`)
+   const data = await res.json() as RouteDetails
     const queryBool: boolean = context.query.isCreate === "true" ? true : false
-    return {props: {post:JSON.parse(JSON.stringify(data)), isCreate: queryBool }}
+    return {props: {post:data, isCreate: queryBool }}
 
 }

@@ -13,10 +13,15 @@ export default function Home(props: { mocks: RouteDetails[]; }) {
   )
 }
 
-export async function getStaticProps() {
-  const res = await fetch(`http://localhost:3000/mocks`,{method:'GET'})
-  const mocks = await res.json() as RouteDetails
-  console.log(mocks)
-  return {props: JSON.parse(JSON.stringify(mocks))}
+export async function getServerSideProps() {
+  const res = await fetch(`http://localhost:3000/mocks`,{
+    method:'GET',
+    headers:{
+      Accept: 'application/json, text/plain, */*',
+      'User-Agent': '*',
+  }
+  })
+  let mocks = await res.json()
+  return {props: {mocks: mocks,}}
 }
  
