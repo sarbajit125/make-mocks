@@ -4,7 +4,7 @@ import TableCell from "@mui/material/TableCell";
 import TableContainer from "@mui/material/TableContainer";
 import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
-import { TableMock } from "../DTO/components";
+import { ListProps, Posts, RouteDetails, TableMock } from "../DTO/components";
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import Paper from '@mui/material/Paper';
@@ -13,7 +13,7 @@ import FilterListIcon from '@mui/icons-material/FilterList';
 import Link from "next/link";
 
 
-export function EnhancedPosts() {
+export function EnhancedPosts(props: ListProps) {
     return ( 
         <Paper sx={{ width: '100%', overflow: 'hidden' }}>
             <Toolbar>
@@ -46,7 +46,7 @@ export function EnhancedPosts() {
                     </TableCell>
                 </TableHead>
                 <TableBody>
-                    {TableMock.map((row) => (
+                    {props.mocks.map((row) => (
                         <TableRow key={row.id}>
                             <TableCell>
                                 {row.title}
@@ -62,7 +62,7 @@ export function EnhancedPosts() {
                             </TableCell>
                             <TableCell>
                                 <Tooltip title="Edit the mock">
-                                <Link href= {`/posts/${row.id}`} passHref>
+                                <Link href= {`/posts/${row.id}?isCreate=false`} passHref>
                                 <IconButton >
                                     <EditIcon />
                                 </IconButton>
@@ -81,4 +81,3 @@ export function EnhancedPosts() {
      </TableContainer>
      </Paper>)
 }
-   

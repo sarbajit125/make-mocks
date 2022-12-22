@@ -8,18 +8,20 @@ import TextField from "@mui/material/TextField";
 import { Posts, RequestType, TableMock } from "../../DTO/components";
 import Editor from "@monaco-editor/react";
 import ResponsiveAppBar from "../../components/navbar";
-import { ChangeEvent } from "react";
+import { ChangeEvent, useState } from "react";
 import { useFormik } from 'formik';
 import * as yup from 'yup';
+import { v4 as uuidv4 } from 'uuid';
+import { Alert, Snackbar } from "@mui/material";
+import { useRouter } from 'next/router'
 
 const validationSchema = yup.object({
     endpoint: yup.string(),
     endpointTitle: yup.string().required('please add title of mock')
 })
 export default function Blog(props) {
-    function handleTextfieldChange(event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) {
-        
-    }
+    const [open, setOpen] = useState(false);
+    const router = useRouter()
     const formik = useFormik({
         initialValues: {
             endpoint: props.isCreate ? "/" : props.post.endpoint,
@@ -30,8 +32,25 @@ export default function Blog(props) {
 
         },
         validationSchema: validationSchema,
-        onSubmit: (values) => {console.log(JSON.stringify(values, null, 2))}
+        onSubmit: (values) => {
+            if (props.isCreate) {
+                let newPost = new Posts(uuidv4(),values.endpointTitle,values.endpointDesc, values.endpoint, values.endpointHTTP, values.endpointResp)
+                TableMock.push(newPost)
+            } else {
+                let updatedPost = new Posts(props.post.id,values.endpointTitle,values.endpointDesc, values.endpoint, values.endpointHTTP, values.endpointResp)
+                const objIdx = TableMock.findIndex((obj) => obj.id == updatedPost.id)
+                TableMock[objIdx] = updatedPost
+            }
+            setOpen(true)
+        }
     })
+    const handleClose = (event?: React.SyntheticEvent | Event, reason?: string) => {
+        if (reason === 'clickaway') {
+          return;
+        }
+        setOpen(false)
+        router.push("/")
+      };
     return(
         <Paper>
             <ResponsiveAppBar />
@@ -41,7 +60,7 @@ export default function Blog(props) {
              id="endpoint"
              label="Route path"
              variant="outlined"
-             inputProps={{startAdornment: <InputAdornment position="start">/</InputAdornment>,}}
+             InputProps={{startAdornment: <InputAdornment position="start">/</InputAdornment>}}
              value={formik.values.endpoint}
              onChange = {formik.handleChange} />
             </Box>
@@ -79,20 +98,27 @@ export default function Blog(props) {
              defaultLanguage="json"
              defaultValue={props.isCreate ? "//some comments" : props.post.response}
              theme="vs-dark"
-             onChange={formik.handleChange} />
+             onChange={(value) => {formik.setFieldValue("endpointResp",JSON.stringify(value),true)}} />
            </Box>
             <Box sx={{pt:3, px: 1, pb:3}} alignItems="center" justifyContent="center" display="flex">  
             <Button sx={{mr: 2, width: '20%'}}  variant="outlined" color="success" type="submit"> Submit</Button>
             <Button sx={{ width: '20%'}} variant="outlined" color="secondary" type="reset"> Reset</Button>
             </Box> 
+            <Box>
+                {open && <Snackbar open={open} autoHideDuration={6000} onClose={handleClose}>
+                    <Alert onClose={handleClose} severity="success" sx={{width:'100%'}}> Mock updated successfully</Alert>
+                </Snackbar> }
+               
+            </Box>
             </form>        
         </Paper>
     )
 }
 
-export async function getServerSideProps(context: { query: { id: any; }; }) {
+export async function getServerSideProps(context: { query: { id: string; isCreate: string; }; }) {
     let pageId = context.query.id 
     const data = TableMock[pageId]
-    return {props: {post:JSON.parse(JSON.stringify(data)), isCreate: false}}
+    const queryBool: boolean = context.query.isCreate === "true" ? true : false
+    return {props: {post:JSON.parse(JSON.stringify(data)), isCreate: queryBool }}
 
 }

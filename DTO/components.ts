@@ -21,8 +21,21 @@ export class Posts{
     }
 }
 
+export interface RouteDetails {
+    id: string;
+    title: string;
+    description: string;
+    endpoint: string;
+    type: string;
+    response: string;
+}
 
-export const TableMock = [ new Posts("0","Circle lobby","Get all circle of user", "v1/circle","GET","{}"),
+export interface ListProps {
+    mocks: RouteDetails[]
+}
+
+
+export var TableMock = [ new Posts("0","Circle lobby","Get all circle of user", "v1/circle","GET","{}"),
                     new Posts("1","Circle Dashboard","Get user details in a circle","v1/circle/dashboard","GET","{}"),
                     new Posts("2","Create circle","Create new circle","v1/create-circle","POST","{}")]
 
