@@ -4,16 +4,38 @@ import TableCell from "@mui/material/TableCell";
 import TableContainer from "@mui/material/TableContainer";
 import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
-import { ListProps, Posts, RouteDetails, TableMock } from "../DTO/components";
+import { ListProps, Posts, ResponseStatus, ResponseStruct, RouteDetails, SuccessResponse, TableMock } from "../DTO/components";
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import Paper from '@mui/material/Paper';
 import { IconButton, Toolbar, Tooltip, Typography } from "@mui/material";
 import FilterListIcon from '@mui/icons-material/FilterList';
 import Link from "next/link";
+import { useState } from "react";
+import ShowToast from "./showToast";
 
 
 export function EnhancedPosts(props: ListProps) {
+    let toastMessage = ""
+    function handleDelete(id:string) {
+        try {
+            deleteMock(id).then((response) => {
+                if(response.status === ResponseStatus.Success) {
+                    setAlert(true)
+                    toastMessage = response.message
+                }   
+            }) 
+        } catch(err) {
+            console.log(err)
+        }
+    }
+    let [showAlert, setAlert] = useState(false)
+    const handleToastClose = (event?: React.SyntheticEvent | Event, reason?: string) => {
+        if (reason === 'clickaway') {
+          return;
+        }
+        setAlert(false)
+      };
     return ( 
         <Paper sx={{ width: '100%', overflow: 'hidden' }}>
             <Toolbar>
@@ -69,7 +91,7 @@ export function EnhancedPosts(props: ListProps) {
                                 </Link>   
                                 </Tooltip> 
                                 <Tooltip title="Delete the Mock">
-                                    <IconButton>
+                                    <IconButton onClick={handleDelete(row.id)}>
                                          <DeleteIcon />
                                     </IconButton>   
                                 </Tooltip>                        
@@ -79,5 +101,22 @@ export function EnhancedPosts(props: ListProps) {
                 </TableBody>
             </Table>
      </TableContainer>
+     <ShowToast message={toastMessage} open={showAlert} onClose={handleToastClose}  />
      </Paper>)
+}
+
+export async function deleteMock(id:string): Promise<ResponseStruct> {
+    const res = await fetch(`http://localhost:3000/mocks?` + new URLSearchParams({
+        id:id,
+    }),{
+        method:"DELETE"
+    })
+    const data = await res.json() as SuccessResponse
+    return {
+        status: ResponseStatus.Success,
+        timeStamp: data.timeStamp,
+        serviceCode: data.serviceCode,
+        message: data.message
+    }
+
 }
