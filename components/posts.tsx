@@ -8,26 +8,35 @@ import { ListProps, Posts, ResponseStatus, ResponseStruct, RouteDetails, Success
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import Paper from '@mui/material/Paper';
-import { IconButton, Toolbar, Tooltip, Typography } from "@mui/material";
+import { Button, IconButton, Toolbar, Tooltip, Typography } from "@mui/material";
 import FilterListIcon from '@mui/icons-material/FilterList';
 import Link from "next/link";
 import { useState } from "react";
 import ShowToast from "./showToast";
-
+import ConfirmModal from "./confirmModal";
+import { useRouter } from "next/router";
+import AddIcon from '@mui/icons-material/Add';
+import { v4 as uuidv4 } from 'uuid';
 
 export function EnhancedPosts(props: ListProps) {
-    let toastMessage = ""
+    const router = useRouter()
+    const [showModal, setShowModal] = useState(false)
+    const [toastMessage, setToastMsg] = useState("")
     function handleDelete(id:string) {
         try {
             deleteMock(id).then((response) => {
                 if(response.status === ResponseStatus.Success) {
+                    setToastMsg(response.message)
+                    console.log(toastMessage)
                     setAlert(true)
-                    toastMessage = response.message
                 }   
             }) 
         } catch(err) {
             console.log(err)
         }
+    }
+    function callModal(id: String) {
+        setShowModal(true)
     }
     let [showAlert, setAlert] = useState(false)
     const handleToastClose = (event?: React.SyntheticEvent | Event, reason?: string) => {
@@ -35,20 +44,23 @@ export function EnhancedPosts(props: ListProps) {
           return;
         }
         setAlert(false)
+        router.replace(router.asPath)
       };
     return ( 
-        <Paper sx={{ width: '100%', overflow: 'hidden' }}>
-            <Toolbar>
+        <Paper sx={{ width: '100%', overflow: 'hidden', pt:4 }}>
+            <Toolbar  sx={{pl: { sm: 2 },pr: { xs: 1, sm: 5 }}}>
                 <Typography variant="h6"  sx={{ flex: '1 1 100%' }} component="div">
-                    Mock routes
+                   {props.mocks.length} Routes available 
                 </Typography>
-                <Tooltip title="Filter list">
-          <IconButton>
-            <FilterListIcon />
-          </IconButton>
-        </Tooltip>
-            </Toolbar>
-    <TableContainer>
+                <Tooltip title="Create new Mock">
+                <Link href={`/posts/${uuidv4()}?isCreate=true`} passHref>
+                <Button variant="contained" startIcon={<AddIcon />} sx={{whiteSpace: "nowrap"}}>
+                    Add Route
+                </Button>
+                </Link>
+                </Tooltip>
+        </Toolbar>
+            <TableContainer>
             <Table stickyHeader>
                 <TableHead>
                     <TableCell>
@@ -91,11 +103,21 @@ export function EnhancedPosts(props: ListProps) {
                                 </Link>   
                                 </Tooltip> 
                                 <Tooltip title="Delete the Mock">
-                                    <IconButton onClick={handleDelete(row.id)}>
+                                    <IconButton onClick={callModal}>
                                          <DeleteIcon />
                                     </IconButton>   
                                 </Tooltip>                        
                             </TableCell>
+                            <ConfirmModal id={row.id}
+                                        open={showModal}
+                                        title={"Delete the route"}
+                                        desc={"Are you sure you want to delete the route ?"}
+                                        actionBtnTitle={"Delete"}
+                                        actionBtnCallback={function (id: string): void {
+                                            setShowModal(false)
+                                            handleDelete(id)} }
+                                        cancelBtnTitle={"Cancel"}
+                                        cancelBtnAction={function (id: string): void {setShowModal(false)} } />
                         </TableRow>
                     ))}
                 </TableBody>
