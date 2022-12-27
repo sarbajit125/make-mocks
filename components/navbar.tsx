@@ -93,7 +93,7 @@ function ResponsiveAppBar(props: NavbarProps) {
         placeholder="Search…"
         inputProps={{ 'aria-label': 'search' }}
       />
-    </Search> : ""}
+    </Search> : null}
     <Box sx={{ flexGrow: 1, display: { xs: 'none', md: 'flex' } }}>
       {props.items.map((page) => (
         <Link key={page.name} href={page.navlink} >

@@ -14,8 +14,9 @@ import { useRouter } from 'next/router'
 import ShowToast from "../../components/showToast";
 
 const validationSchema = yup.object({
-    endpoint: yup.string(),
-    endpointTitle: yup.string().required('please add title of mock')
+    endpoint: yup.string()
+            .matches(/^\/[a-z0-9]+$/i),
+    endpointTitle: yup.string('Name of mock').required('Please add title of mock')
 })
 const navLinks: [NavItemsList] = [{name:"Dashboard", navlink:"/"}]
 export default function Blog(props: { isCreate: boolean; post: RouteDetails; }) {
@@ -69,6 +70,7 @@ export default function Blog(props: { isCreate: boolean; post: RouteDetails; }) 
              variant="outlined"
              InputProps={{startAdornment: <InputAdornment position="start">ADG</InputAdornment>}}
              value={formik.values.endpoint}
+             helperText={formik.touched.endpoint && formik.errors.endpoint}
              onChange = {formik.handleChange} />
             </Box>
             <Box sx={{pt:3, px: 1}}>
@@ -92,6 +94,9 @@ export default function Blog(props: { isCreate: boolean; post: RouteDetails; }) 
              id="endpointTitle"
              label="Title of Mock"
              value={formik.values.endpointTitle}
+             onBlur={ formik.handleBlur}
+             error={formik.touched.endpointTitle && Boolean(formik.errors.endpointTitle)}
+             helperText={formik.touched.endpointTitle && formik.errors.endpointTitle}
              onChange={formik.handleChange}   />
             </Box>
             <Box sx={{pt:3, px: 1}}>   
