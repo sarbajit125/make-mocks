@@ -8,7 +8,7 @@ import { ListProps, Posts, ResponseStatus, ResponseStruct, RouteDetails, Success
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import Paper from '@mui/material/Paper';
-import { Button, IconButton, Toolbar, Tooltip, Typography } from "@mui/material";
+import { AlertColor, Button, IconButton, Toolbar, Tooltip, Typography } from "@mui/material";
 import FilterListIcon from '@mui/icons-material/FilterList';
 import Link from "next/link";
 import { useState } from "react";
@@ -22,6 +22,7 @@ export function EnhancedPosts(props: ListProps) {
     const router = useRouter()
     const [showModal, setShowModal] = useState(false)
     const [toastMessage, setToastMsg] = useState("")
+    const [toastColor, setToastColor] = useState<AlertColor>("success")
     function handleDelete(id:string) {
         try {
             deleteMock(id).then((response) => {
@@ -53,7 +54,7 @@ export function EnhancedPosts(props: ListProps) {
                    {props.mocks.length} Routes available 
                 </Typography>
                 <Tooltip title="Create new Mock">
-                <Link href={`/posts/${uuidv4()}?isCreate=true`} passHref>
+                <Link href={`/posts/${uuidv4()}?isCreate=true`} style={{ textDecoration: 'none' }} passHref >
                 <Button variant="contained" startIcon={<AddIcon />} sx={{whiteSpace: "nowrap"}}>
                     Add Route
                 </Button>
@@ -103,7 +104,7 @@ export function EnhancedPosts(props: ListProps) {
                                 </Link>   
                                 </Tooltip> 
                                 <Tooltip title="Delete the Mock">
-                                    <IconButton onClick={callModal}>
+                                    <IconButton onClick={() => callModal(row.id)}>
                                          <DeleteIcon />
                                     </IconButton>   
                                 </Tooltip>                        
@@ -123,7 +124,7 @@ export function EnhancedPosts(props: ListProps) {
                 </TableBody>
             </Table>
      </TableContainer>
-     <ShowToast message={toastMessage} open={showAlert} onClose={handleToastClose}  />
+     <ShowToast message={toastMessage} open={showAlert} onClose={handleToastClose} color={toastColor}  />
      </Paper>)
 }
 

@@ -1,5 +1,6 @@
 
 import { Inter } from '@next/font/google'
+import { APIManager } from '../api/apiManager';
 import ResponsiveAppBar, { NavItemsList } from '../components/navbar'
 import { EnhancedPosts } from '../components/posts'
 import { RouteDetails } from '../DTO/components'

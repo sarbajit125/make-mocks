@@ -12,16 +12,18 @@ import { useFormik } from 'formik';
 import * as yup from 'yup';
 import { useRouter } from 'next/router'
 import ShowToast from "../../components/showToast";
+import { AlertColor } from "@mui/material";
 
 const validationSchema = yup.object({
     endpoint: yup.string()
             .matches(/^\/[a-z0-9]+$/i),
-    endpointTitle: yup.string('Name of mock').required('Please add title of mock')
+    endpointTitle: yup.string().required('Please add title of mock')
 })
 const navLinks: [NavItemsList] = [{name:"Dashboard", navlink:"/"}]
 export default function Blog(props: { isCreate: boolean; post: RouteDetails; }) {
     const [open, setOpen] = useState(false);
     const [toastMsg, setToastmsg] = useState("");
+    const [toastColor, setToastColor] = useState<AlertColor>("success")
     const router = useRouter()
     const formik = useFormik({
         initialValues: {
@@ -120,7 +122,7 @@ export default function Blog(props: { isCreate: boolean; post: RouteDetails; }) 
             <Button sx={{ width: '20%'}} variant="outlined" color="secondary" type="reset"> Reset</Button>
             </Box> 
             <Box>
-                <ShowToast message={toastMsg} open={open} onClose={handleClose} />
+                <ShowToast message={toastMsg} open={open} onClose={handleClose} color={toastColor} />
             </Box>
             </form>        
         </Paper>

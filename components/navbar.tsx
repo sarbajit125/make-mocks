@@ -96,7 +96,7 @@ function ResponsiveAppBar(props: NavbarProps) {
     </Search> : null}
     <Box sx={{ flexGrow: 1, display: { xs: 'none', md: 'flex' } }}>
       {props.items.map((page) => (
-        <Link key={page.name} href={page.navlink} >
+        <Link key={page.name} href={page.navlink} style={{ textDecoration: 'none' }} >
           <Button
             key={page.name}
             sx={{ my: 2, color: 'white', display: 'block' }} >{page.name}
