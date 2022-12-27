@@ -18,14 +18,21 @@ export default function Home(props: { mocks: RouteDetails[]; }) {
 }
 
 export async function getStaticProps() {
-  const res = await fetch(`http://localhost:3000/mocks`,{
-    method:'GET',
-    headers:{
-      Accept: 'application/json, text/plain, */*',
-      'User-Agent': '*',
+  // const res = await fetch(`http://localhost:3000/mocks`,{
+  //   method:'GET',
+  //   headers:{
+  //     Accept: 'application/json, text/plain, */*',
+  //     'User-Agent': '*',
+  // }
+  // })
+  // let mocks = await res.json()
+  // return {props: {mocks: mocks,}}
+  try {
+    const res = await APIManager.sharedInstance().getAllRoutes()
+    console.log(res)
+    return {props:{mocks: res}}
+  } catch (error) {
+      console.log(error)
   }
-  })
-  let mocks = await res.json()
-  return {props: {mocks: mocks,}}
-}
  
+}

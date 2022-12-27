@@ -1,5 +1,5 @@
 import axios, { AxiosError } from "axios";
-import { ResponseStatus, ResponseStruct, RouteDetails } from "../DTO/components";
+import { ResponseStatus, ResponseStruct, RouteDetails, SuccessResponse } from "../DTO/components";
 
 
 export class APIManager {
@@ -12,7 +12,7 @@ export class APIManager {
         return APIManager.instance;
     }
     queryUrl = "http://localhost:3000/mocks"
-    async getAllRoutes() : Promise<RouteDetails[] | undefined> {
+    async getAllRoutes() : Promise<RouteDetails[]> {
         try {
             const response = await axios.get<RouteDetails[]>(this.queryUrl,{
                 headers: {
@@ -40,6 +40,34 @@ export class APIManager {
                     message: error.response?.statusText ? error.response.statusText : "Bad request",
                     timeStamp: ""
                 }
+            } else {
+                console.log(error)
+            }
+        }
+    }
+    async deleteRoute(id: string) : Promise<SuccessResponse> {
+        try {
+            const response = await axios.delete<SuccessResponse>(this.queryUrl, {params:{id:id}})
+            if (response.status == 201) {
+                return Promise.resolve(response.data as SuccessResponse)
+            } else {
+                const errObj: SuccessResponse = {
+                    serviceCode: 500,
+                    message: "Something went wrong",
+                    timeStamp: ""
+                }
+                return Promise.reject(errObj)
+            }
+        } catch (error) {
+            if (axios.isAxiosError(error)) {
+                const errObj : SuccessResponse = {
+                    serviceCode: error.response?.status ? error.response.status : 400,
+                    message: error.response?.statusText ? error.response.statusText : "Bad Request",
+                    timeStamp: ""
+                }
+            } else {
+                console.log(error)
+                throw new Error()
             }
         }
     }

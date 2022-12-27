@@ -17,6 +17,7 @@ import ConfirmModal from "./confirmModal";
 import { useRouter } from "next/router";
 import AddIcon from '@mui/icons-material/Add';
 import { v4 as uuidv4 } from 'uuid';
+import { APIManager } from "../api/apiManager";
 
 export function EnhancedPosts(props: ListProps) {
     const router = useRouter()
@@ -25,13 +26,17 @@ export function EnhancedPosts(props: ListProps) {
     const [toastColor, setToastColor] = useState<AlertColor>("success")
     function handleDelete(id:string) {
         try {
-            deleteMock(id).then((response) => {
-                if(response.status === ResponseStatus.Success) {
-                    setToastMsg(response.message)
-                    console.log(toastMessage)
-                    setAlert(true)
-                }   
-            }) 
+            // deleteMock(id).then((response) => {
+            //     if(response.status === ResponseStatus.Success) {
+            //         setToastMsg(response.message)
+            //         console.log(toastMessage)
+            //         setAlert(true)
+            //     }   
+            // }) 
+            APIManager.sharedInstance().deleteRoute(id).then((response) => {
+                setToastMsg(response?.message)
+                setAlert(true)
+            })
         } catch(err) {
             console.log(err)
         }
@@ -64,6 +69,7 @@ export function EnhancedPosts(props: ListProps) {
             <TableContainer>
             <Table stickyHeader>
                 <TableHead>
+                 <TableRow>
                     <TableCell>
                         Title
                     </TableCell>
@@ -79,6 +85,7 @@ export function EnhancedPosts(props: ListProps) {
                     <TableCell>
                         Actions
                     </TableCell>
+                  </TableRow>
                 </TableHead>
                 <TableBody>
                     {props.mocks.map((row) => (
@@ -97,7 +104,7 @@ export function EnhancedPosts(props: ListProps) {
                             </TableCell>
                             <TableCell>
                                 <Tooltip title="Edit the mock">
-                                <Link href= {`/posts/${row.id}?isCreate=false`} passHref>
+                                <Link href= {{pathname:`/posts/${row.id}`, query:{isCreate:false}}} passHref>
                                 <IconButton >
                                     <EditIcon />
                                 </IconButton>
