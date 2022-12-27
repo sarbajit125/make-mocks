@@ -1,6 +1,5 @@
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
-import Container from "@mui/material/Container";
 import InputAdornment from "@mui/material/InputAdornment";
 import MenuItem from "@mui/material/MenuItem";
 import Paper from "@mui/material/Paper";
@@ -11,8 +10,6 @@ import ResponsiveAppBar, { NavItemsList } from "../../components/navbar";
 import { ChangeEvent, useState } from "react";
 import { useFormik } from 'formik';
 import * as yup from 'yup';
-import { v4 as uuidv4 } from 'uuid';
-import { Alert, Snackbar } from "@mui/material";
 import { useRouter } from 'next/router'
 import ShowToast from "../../components/showToast";
 
@@ -76,10 +73,12 @@ export default function Blog(props: { isCreate: boolean; post: RouteDetails; }) 
             </Box>
             <Box sx={{pt:3, px: 1}}>
                 <TextField id="endpointHTTP"
-                 select label="select"
-                  value={formik.values.endpointHTTP}
-                   helperText="Please select request type"
-                     onChange={formik.handleChange}>
+                 select
+                 label="select"
+                 name="endpointHTTP"
+                 value={formik.values.endpointHTTP}
+                 helperText="Please select request type"
+                 onChange={formik.handleChange}>
                     {
                         RequestType.map((request)=>(
                         <MenuItem key={request} value={request}>{request}</MenuItem>
@@ -126,7 +125,6 @@ export default function Blog(props: { isCreate: boolean; post: RouteDetails; }) 
 async function submitPost(isCreate: boolean, mock:RouteDetails) : Promise<ResponseStruct> {
     try {
          if (isCreate) {
-            console.log("Coming to post api")
             console.log(mock)
          const res = await fetch(`http://localhost:3000/mocks`,{
          method:'POST',
@@ -152,10 +150,14 @@ async function submitPost(isCreate: boolean, mock:RouteDetails) : Promise<Respon
         }
      }
     } else {
-        let body = (JSON.stringify(mock))
+        console.log("coming to put")
+        let body = JSON.stringify(mock)
         console.log(body)
        const res = await fetch(`http://localhost:3000/mocks`, {
         method:'PUT',
+        headers: {
+            'Content-Type': 'application/json'
+            },
         body: body
        })
        const data = await res.json() as SuccessResponse
