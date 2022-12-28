@@ -10,6 +10,8 @@ export default function Home(props: { mocks: RouteDetails[]; }) {
   const [toastMsg, setToastMsg] = useState<string>("")
   const [openToast, setOpenToast] = useState<boolean>(false)
   const [mocks, setMocks] = useState<RouteDetails[]>([])
+  const [isSearching, setSearching] = useState<boolean>(false)
+  const [filterList, setFilterList] = useState<RouteDetails[]>([])
   useEffect( () => {
     APIManager.sharedInstance().getAllRoutes().then ((res) => {
       setMocks(res)
@@ -25,21 +27,21 @@ export default function Home(props: { mocks: RouteDetails[]; }) {
   return (
    <div>
      <ResponsiveAppBar items={navItems} showSearch={true} searchCallback={function (inputTxt: string): void {
-       console.log(inputTxt);
+        console.log(inputTxt)
+          if (inputTxt.length > 0) {
+            const filterList = mocks.filter((data) => {
+              data.title.toLowerCase().includes(inputTxt.toLowerCase())
+            })
+            console.log(filterList)
+            setSearching(true)
+            setFilterList(filterList)
+          } else {
+            setSearching(false)
+            setFilterList(mocks)
+          }
       } } />
-     <EnhancedPosts mocks={mocks} />
+     <EnhancedPosts mocks={isSearching ? filterList : mocks}/>
      <ShowToast message={toastMsg} color={'error'} open={openToast} />
     </div>
   )
-}
-
-export async function getStaticProps() {
-  try {
-    const res = await APIManager.sharedInstance().getAllRoutes()
-    console.log(res)
-    return {props:{mocks: res}}
-  } catch (error) {
-      console.log(error)
-  }
- 
 }
