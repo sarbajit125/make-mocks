@@ -4,12 +4,11 @@ import TableCell from "@mui/material/TableCell";
 import TableContainer from "@mui/material/TableContainer";
 import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
-import { ListProps, Posts, ResponseStatus, ResponseStruct, RouteDetails, SuccessResponse, TableMock } from "../DTO/components";
+import { APIResponseErr, ListProps, Posts, ResponseStatus, ResponseStruct, RouteDetails, SuccessResponse, TableMock } from "../DTO/components";
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import Paper from '@mui/material/Paper';
 import { AlertColor, Button, IconButton, Toolbar, Tooltip, Typography } from "@mui/material";
-import FilterListIcon from '@mui/icons-material/FilterList';
 import Link from "next/link";
 import { useState } from "react";
 import ShowToast from "./showToast";
@@ -27,9 +26,16 @@ export function EnhancedPosts(props: ListProps) {
     function handleDelete(id:string) {
             APIManager.sharedInstance().deleteRoute(id).then((response) => {
                 setToastMsg(response?.message)
+                setToastColor("success")
                 setAlert(true)
             }).catch((err) => {
-                console.log(err)
+                if( err instanceof APIResponseErr) {
+                    setToastMsg(err.message)
+                    setToastColor("error")
+                    setAlert(true)
+                } else {
+                    console.log(err)
+                }
             })
     }
     function callModal(id: String) {

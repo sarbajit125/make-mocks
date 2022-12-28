@@ -54,3 +54,15 @@ export var TableMock = [ new Posts("0","Circle lobby","Get all circle of user", 
                     new Posts("2","Create circle","Create new circle","v1/create-circle","POST","{}")]
 
 export  const RequestType = ["POST","GET","PUT","DELETE","PATCH"];
+
+export class APIResponseErr extends Error {
+    serviceCode: number;
+    status: ResponseStatus;
+    timeStamp?: string;
+    constructor(serviceCode: number, status: ResponseStatus, timeStamp?: string, message?: string) {
+        super(message)
+        this.serviceCode = serviceCode
+        this.status = status
+        this.timeStamp = timeStamp  
+    }
+}

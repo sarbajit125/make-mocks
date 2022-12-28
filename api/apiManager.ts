@@ -1,5 +1,5 @@
 import axios, { AxiosError, AxiosResponse } from "axios";
-import { ResponseStatus, ResponseStruct, RouteDetails, SuccessResponse } from "../DTO/components";
+import { APIResponseErr, ResponseStatus, ResponseStruct, RouteDetails, SuccessResponse } from "../DTO/components";
 
 
 export class APIManager {
@@ -79,11 +79,6 @@ export class APIManager {
                 return Promise.resolve(response.data as RouteDetails)
             } else {
                 const errObj = this.handleInvalidHttp(response)
-                // const errObj: SuccessResponse = {
-                //     serviceCode: response.status,
-                //     message: "Invalid http code returned",
-                //     timeStamp: ""
-                // }
                  return Promise.reject(errObj)
             }
         } catch (error) {
@@ -93,23 +88,13 @@ export class APIManager {
 
     handleCatchedError(error: unknown) : SuccessResponse | Error {
         if (axios.isAxiosError(error)) {
-            const errObj: SuccessResponse = {
-                serviceCode: error.response?.status ? error.response.status : 400,
-                message: error.response?.statusText ? error.response.statusText : "Something went wrong",
-                timeStamp: ""
-            }
-            throw errObj
+            throw new APIResponseErr(error.response?.status ? error.response.status : 400, ResponseStatus.Failure, "", error.response?.statusText)
         } else {
             console.log(error)
             throw new Error("error could not be validated")
         }
     }
     handleInvalidHttp(response: AxiosResponse<any, any>) {
-        const errObj: SuccessResponse = {
-            serviceCode: response.status,
-            message: "Invalid http code returned",
-            timeStamp: ""
-        }
-        return (errObj)
+        throw new APIResponseErr(response.status, ResponseStatus.Failure, "", "Invalid http code returned")
     }
 }

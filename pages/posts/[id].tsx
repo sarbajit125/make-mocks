@@ -4,7 +4,7 @@ import InputAdornment from "@mui/material/InputAdornment";
 import MenuItem from "@mui/material/MenuItem";
 import Paper from "@mui/material/Paper";
 import TextField from "@mui/material/TextField";
-import { Posts, RequestType, ResponseStatus, ResponseStruct, RouteDetails, SuccessResponse, TableMock } from "../../DTO/components";
+import { APIResponseErr, Posts, RequestType, ResponseStatus, ResponseStruct, RouteDetails, SuccessResponse, TableMock } from "../../DTO/components";
 import Editor from "@monaco-editor/react";
 import ResponsiveAppBar, { NavItemsList } from "../../components/navbar";
 import { ChangeEvent, useState } from "react";
@@ -32,14 +32,26 @@ export default function Blog(props: { isCreate: boolean; post: RouteDetails; }) 
                 setToastmsg(response.message)
                 setOpen(true)
             }).catch((err) => {
-                console.log(err)
+                if( err instanceof APIResponseErr) {
+                    setToastmsg(err.message)
+                    setOpen(true)
+                } else {
+                    console.log(err)
+                }
             })
         } else {
             APIManager.sharedInstance().updateRoute(mock).then((response) => {
                 setToastmsg(response.message)
+                setToastColor("success")
                 setOpen(true)
-            }).catch ((err) => {
-                console.log(err)
+            }).catch ((err) => {    
+                if( err instanceof APIResponseErr) {
+                    setToastmsg(err.message)
+                    setToastColor("error")
+                    setOpen(true)
+                } else {
+                    console.log(err)
+                }
             })
         }
     }
