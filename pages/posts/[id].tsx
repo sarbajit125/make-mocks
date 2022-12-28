@@ -87,9 +87,7 @@ export default function Blog(props: { isCreate: boolean; post: RouteDetails; }) 
       };
     return(
         <Paper>
-            <ResponsiveAppBar items={navLinks} showSearch={false} searchCallback={function (inputTxt: string): void {
-                console.log(inputTxt);
-            } } />
+            <ResponsiveAppBar items={navLinks} />
             <form onSubmit={formik.handleSubmit} onReset={formik.handleReset}>
             <Box sx={{display: 'flex', flexWrap: 'wrap', pt: 3, px: 1}}>
             <TextField fullWidth

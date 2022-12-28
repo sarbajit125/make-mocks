@@ -33,7 +33,7 @@ export class APIManager {
     async deleteRoute(id: string) : Promise<SuccessResponse> {
         try {
             const response = await axios.delete<SuccessResponse>(this.queryUrl, {params:{id:id}})
-            if (response.status == 201) {
+            if (response.status == 200) {
                 return Promise.resolve(response.data as SuccessResponse)
             } else {
                 const errObj = this.handleInvalidHttp(response)

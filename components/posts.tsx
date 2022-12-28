@@ -57,8 +57,8 @@ export function EnhancedPosts(props: ListProps) {
                    {props.mocks.length} Routes available 
                 </Typography>
                 <Tooltip title="Create new Mock">
-                <Link href={`/posts/${uuidv4()}?isCreate=true`} style={{ textDecoration: 'none' }} passHref >
-                <Button variant="contained" startIcon={<AddIcon />} sx={{whiteSpace: "nowrap"}}>
+                <Link href={`/posts/${createId}?isCreate=true`} style={{ textDecoration: 'none' }} prefetch={false} passHref >
+                <Button variant="contained" startIcon={<AddIcon />} sx={{whiteSpace: "nowrap"}} onClick={() => {setCreateId(uuidv4())}}>
                     Add Route
                 </Button>
                 </Link>
@@ -102,8 +102,8 @@ export function EnhancedPosts(props: ListProps) {
                             </TableCell>
                             <TableCell>
                                 <Tooltip title="Edit the mock">
-                                <Link href= {{pathname:`/posts/${createId}`, query:{isCreate:false}}} prefetch={false} passHref>
-                                <IconButton onClick={() => {setCreateId(uuidv4())}} >
+                                <Link href= {{pathname:`/posts/${row.id}`, query:{isCreate:false}}} passHref>
+                                <IconButton>
                                     <EditIcon />
                                 </IconButton>
                                 </Link>   

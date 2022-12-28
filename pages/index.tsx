@@ -1,5 +1,5 @@
 
-import { useEffect, useState } from 'react';
+import { SetStateAction, useEffect, useState } from 'react';
 import { APIManager } from '../api/apiManager';
 import ResponsiveAppBar, { NavItemsList } from '../components/navbar'
 import { EnhancedPosts } from '../components/posts'
@@ -26,22 +26,25 @@ export default function Home(props: { mocks: RouteDetails[]; }) {
   const navItems: [NavItemsList] = [{name:"About", navlink:"/about"}]
   return (
    <div>
-     <ResponsiveAppBar items={navItems} showSearch={true} searchCallback={function (inputTxt: string): void {
-        console.log(inputTxt)
-          if (inputTxt.length > 0) {
-            const filterList = mocks.filter((data) => {
-              data.title.toLowerCase().includes(inputTxt.toLowerCase())
-            })
-            console.log(filterList)
-            setSearching(true)
-            setFilterList(filterList)
-          } else {
-            setSearching(false)
-            setFilterList(mocks)
-          }
-      } } />
+     <ResponsiveAppBar items={navItems}/>
      <EnhancedPosts mocks={isSearching ? filterList : mocks}/>
      <ShowToast message={toastMsg} color={'error'} open={openToast} />
     </div>
   )
 }
+function newFunction(mocks: RouteDetails[], setFilterList: { (value: SetStateAction<RouteDetails[]>): void; (arg0: RouteDetails[]): void; }, setSearching: { (value: SetStateAction<boolean>): void; (arg0: boolean): void; }): (inputTxt: string) => void {
+  return (inputTxt: string) => {
+    console.log(inputTxt);
+    if (inputTxt.length > 0) {
+      const filterList = mocks.filter((data) => data.title.toLowerCase().includes(inputTxt.toLowerCase())
+      );
+      console.log(filterList);
+      setFilterList(filterList);
+      setSearching(true);
+    } else {
+      setFilterList(mocks);
+      setSearching(false);
+    }
+  };
+}
+
