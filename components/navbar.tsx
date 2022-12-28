@@ -72,7 +72,7 @@ function ResponsiveAppBar(props: NavbarProps) {
           <IconButton>
             <MenuIcon />
           </IconButton>
-          <Typography noWrap sx={{ display: { xs: "none", sm: "block" } }}>
+          <Typography noWrap sx={{ display: { xs: "none", sm: "inline" } }}>
             MAKE-MOCKS
           </Typography>
           <Box sx={{ flexGrow: 1, display: { xs: "none", md: "flex" } }}>
@@ -84,7 +84,7 @@ function ResponsiveAppBar(props: NavbarProps) {
               >
                 <Button
                   key={page.name}
-                  sx={{ my: 2, color: "white", display: "block" }}
+                  sx={{ my: 2, color: "white", display: "inline" }}
                 >
                   {page.name}
                 </Button>

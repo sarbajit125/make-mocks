@@ -4,13 +4,13 @@ import TableCell from "@mui/material/TableCell";
 import TableContainer from "@mui/material/TableContainer";
 import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
-import { APIResponseErr, ListProps} from "../DTO/components";
+import { APIResponseErr, ListProps, RouteDetails} from "../DTO/components";
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import Paper from '@mui/material/Paper';
-import { AlertColor, Button, IconButton, Toolbar, Tooltip, Typography } from "@mui/material";
+import { AlertColor, Button, IconButton, Toolbar, Tooltip, Typography, Box, TextField } from "@mui/material";
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import ShowToast from "./showToast";
 import ConfirmModal from "./confirmModal";
 import { useRouter } from "next/router";
@@ -24,6 +24,13 @@ export function EnhancedPosts(props: ListProps) {
     const [toastMessage, setToastMsg] = useState("")
     const [toastColor, setToastColor] = useState<AlertColor>("success")
     const [createId, setCreateId] = useState<string>("")
+    const [rows, setRows] = useState<RouteDetails[]>(props.mocks)
+    const [searchTxt, setSearch] = useState<string>("")
+    const  originalList = props.mocks
+
+    useEffect(() => {
+        setRows(props.mocks)
+    }, [props])  
     function handleDelete(id:string) {
             APIManager.sharedInstance().deleteRoute(id).then((response) => {
                 setToastMsg(response?.message)
@@ -39,6 +46,17 @@ export function EnhancedPosts(props: ListProps) {
                 }
             })
     }
+    function handleFilter(inputTxt: string) {
+        setSearch(inputTxt)
+         if (inputTxt.length > 0) {
+             let filterData: RouteDetails[] = originalList.filter((data) => data.title.toLowerCase().includes(inputTxt.toLowerCase()))
+             setRows(filterData)
+
+         } else {
+            setRows(originalList)
+         }
+       
+    }
     function callModal(id: String) {
         setShowModal(true)
     }
@@ -52,10 +70,14 @@ export function EnhancedPosts(props: ListProps) {
       };
     return ( 
         <Paper sx={{ width: '100%', overflow: 'hidden', pt:4 }}>
-            <Toolbar  sx={{pl: { sm: 2 },pr: { xs: 1, sm: 5 }}}>
-                <Typography variant="h6"  sx={{ flex: '1 1 100%' }} component="div">
-                   {props.mocks.length} Routes available 
+            <Toolbar  sx={{pl: { sm: 2 },pr: { xs: 1, sm: 5 }, justifyContent:'space-between'}}>
+                <Box>
+                <Typography variant="h6"  component="div">
+                   {rows.length} Routes available 
                 </Typography>
+                </Box>
+                <Box>
+                <TextField placeholder="Search.." size="small" sx={{pr:2}} value={searchTxt} onChange={(event) => {handleFilter(event.target.value)}}  />
                 <Tooltip title="Create new Mock">
                 <Link href={`/posts/${createId}?isCreate=true`} style={{ textDecoration: 'none' }} prefetch={false} passHref >
                 <Button variant="contained" startIcon={<AddIcon />} sx={{whiteSpace: "nowrap"}} onClick={() => {setCreateId(uuidv4())}}>
@@ -63,6 +85,7 @@ export function EnhancedPosts(props: ListProps) {
                 </Button>
                 </Link>
                 </Tooltip>
+                </Box>   
         </Toolbar>
             <TableContainer>
             <Table stickyHeader>
@@ -86,7 +109,7 @@ export function EnhancedPosts(props: ListProps) {
                   </TableRow>
                 </TableHead>
                 <TableBody>
-                    {props.mocks.map((row) => (
+                    {rows.map((row) => (
                         <TableRow key={row.id}>
                             <TableCell>
                                 {row.title}
