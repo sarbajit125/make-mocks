@@ -66,3 +66,8 @@ export class APIResponseErr extends Error {
         this.timeStamp = timeStamp  
     }
 }
+
+export enum paths {
+    dashboard = "/",
+    about = "/about"
+}

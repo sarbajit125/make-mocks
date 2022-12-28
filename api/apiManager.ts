@@ -17,7 +17,6 @@ export class APIManager {
             const response = await axios.get<RouteDetails[]>(this.queryUrl,{
                 headers: {
                     Accept: 'application/json, text/plain, */*',
-                    'User-Agent': '*',
                 }
             })
             console.log(response.data)

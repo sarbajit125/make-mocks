@@ -4,7 +4,7 @@ import TableCell from "@mui/material/TableCell";
 import TableContainer from "@mui/material/TableContainer";
 import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
-import { APIResponseErr, ListProps, Posts, ResponseStatus, ResponseStruct, RouteDetails, SuccessResponse, TableMock } from "../DTO/components";
+import { APIResponseErr, ListProps} from "../DTO/components";
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import Paper from '@mui/material/Paper';
@@ -23,6 +23,7 @@ export function EnhancedPosts(props: ListProps) {
     const [showModal, setShowModal] = useState(false)
     const [toastMessage, setToastMsg] = useState("")
     const [toastColor, setToastColor] = useState<AlertColor>("success")
+    const [createId, setCreateId] = useState<string>("")
     function handleDelete(id:string) {
             APIManager.sharedInstance().deleteRoute(id).then((response) => {
                 setToastMsg(response?.message)
@@ -101,8 +102,8 @@ export function EnhancedPosts(props: ListProps) {
                             </TableCell>
                             <TableCell>
                                 <Tooltip title="Edit the mock">
-                                <Link href= {{pathname:`/posts/${row.id}`, query:{isCreate:false}}} passHref>
-                                <IconButton >
+                                <Link href= {{pathname:`/posts/${createId}`, query:{isCreate:false}}} prefetch={false} passHref>
+                                <IconButton onClick={() => {setCreateId(uuidv4())}} >
                                     <EditIcon />
                                 </IconButton>
                                 </Link>   
