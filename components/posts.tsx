@@ -25,21 +25,12 @@ export function EnhancedPosts(props: ListProps) {
     const [toastMessage, setToastMsg] = useState("")
     const [toastColor, setToastColor] = useState<AlertColor>("success")
     function handleDelete(id:string) {
-        try {
-            // deleteMock(id).then((response) => {
-            //     if(response.status === ResponseStatus.Success) {
-            //         setToastMsg(response.message)
-            //         console.log(toastMessage)
-            //         setAlert(true)
-            //     }   
-            // }) 
             APIManager.sharedInstance().deleteRoute(id).then((response) => {
                 setToastMsg(response?.message)
                 setAlert(true)
+            }).catch((err) => {
+                console.log(err)
             })
-        } catch(err) {
-            console.log(err)
-        }
     }
     function callModal(id: String) {
         setShowModal(true)
@@ -133,20 +124,4 @@ export function EnhancedPosts(props: ListProps) {
      </TableContainer>
      <ShowToast message={toastMessage} open={showAlert} onClose={handleToastClose} color={toastColor}  />
      </Paper>)
-}
-
-export async function deleteMock(id:string): Promise<ResponseStruct> {
-    const res = await fetch(`http://localhost:3000/mocks?` + new URLSearchParams({
-        id:id,
-    }),{
-        method:"DELETE"
-    })
-    const data = await res.json() as SuccessResponse
-    return {
-        status: ResponseStatus.Success,
-        timeStamp: data.timeStamp,
-        serviceCode: data.serviceCode,
-        message: data.message
-    }
-
 }

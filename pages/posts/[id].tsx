@@ -13,10 +13,11 @@ import * as yup from 'yup';
 import { useRouter } from 'next/router'
 import ShowToast from "../../components/showToast";
 import { AlertColor } from "@mui/material";
+import { APIManager } from "../../api/apiManager";
 
 const validationSchema = yup.object({
     endpoint: yup.string()
-            .matches(/^\/[a-z0-9]+$/i),
+            .matches(/^\/.*/),
     endpointTitle: yup.string().required('Please add title of mock')
 })
 const navLinks: [NavItemsList] = [{name:"Dashboard", navlink:"/"}]
@@ -25,6 +26,24 @@ export default function Blog(props: { isCreate: boolean; post: RouteDetails; }) 
     const [toastMsg, setToastmsg] = useState("");
     const [toastColor, setToastColor] = useState<AlertColor>("success")
     const router = useRouter()
+    function submitRoute(isCreate: boolean, mock:RouteDetails) {
+        if (isCreate) {
+            APIManager.sharedInstance().createRoute(mock).then((response) => {
+                setToastmsg(response.message)
+                setOpen(true)
+            }).catch((err) => {
+                console.log(err)
+            })
+        } else {
+            APIManager.sharedInstance().updateRoute(mock).then((response) => {
+                setToastmsg(response.message)
+                setOpen(true)
+            }).catch ((err) => {
+                console.log(err)
+            })
+        }
+    }
+    
     const formik = useFormik({
         initialValues: {
             endpoint:  props.post.endpoint,
@@ -44,12 +63,7 @@ export default function Blog(props: { isCreate: boolean; post: RouteDetails; }) 
                     type: values.endpointHTTP,
                     response: values.endpointResp
                 }
-                submitPost(props.isCreate, payload).then((response) => {
-                    if (response.status == ResponseStatus.Success) {
-                        setToastmsg(response.message)
-                        setOpen(true)
-                    }
-                })
+                submitRoute(props.isCreate, payload)
         }
     })
     const handleClose = (event?: React.SyntheticEvent | Event, reason?: string) => {
@@ -128,68 +142,6 @@ export default function Blog(props: { isCreate: boolean; post: RouteDetails; }) 
         </Paper>
     )
 }
-
-async function submitPost(isCreate: boolean, mock:RouteDetails) : Promise<ResponseStruct> {
-    try {
-         if (isCreate) {
-            console.log(mock)
-         const res = await fetch(`http://localhost:3000/mocks`,{
-         method:'POST',
-         headers: {
-            'Content-Type': 'application/json'
-            },
-         body: JSON.stringify(mock)
-    })
-    const data = await res.json() as SuccessResponse
-    if (res.ok) {     
-        return {
-            status: ResponseStatus.Success,
-            timeStamp: data.timeStamp,
-            message: data.message,
-            serviceCode: data.serviceCode
-        }
-     } else {
-        return {
-            status: ResponseStatus.Failure,
-            timeStamp: "",
-            message: "Something went wrong",
-            serviceCode: 400
-        }
-     }
-    } else {
-        console.log("coming to put")
-        let body = JSON.stringify(mock)
-        console.log(body)
-       const res = await fetch(`http://localhost:3000/mocks`, {
-        method:'PUT',
-        headers: {
-            'Content-Type': 'application/json'
-            },
-        body: body
-       })
-       const data = await res.json() as SuccessResponse
-       if (res.ok) {
-        return {
-            status: ResponseStatus.Success,
-            timeStamp: data.timeStamp,
-            message: data.message,
-            serviceCode: data.serviceCode
-        }
-       } else {
-        return {
-            status: ResponseStatus.Failure,
-            timeStamp: "",
-            message: "Something went wrong",
-            serviceCode: 400
-        }
-       }
-    }
-    } catch (error) {
-        console.log(error)
-        throw new Error("Something went wrong")
-    }
-}
-
 export async function getServerSideProps(context: { query: { id: string; isCreate: string; }; }) {
     let pageId = context.query.id 
     const queryBool: boolean = context.query.isCreate === "true" ? true : false
@@ -204,8 +156,11 @@ export async function getServerSideProps(context: { query: { id: string; isCreat
         }
         return {props:{post: data, isCreate: queryBool}}
     } else {
-        const res = await fetch(`http://localhost:3000/mocks/${pageId}`)
-        const data = await res.json() as RouteDetails
-        return {props: {post:data, isCreate: queryBool }}
+        try {
+            const data = await APIManager.sharedInstance().fetchTheRoute(pageId)
+            return {props: {post:data, isCreate: queryBool }}
+        } catch (error) {
+            
+        }
     }
 }

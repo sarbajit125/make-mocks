@@ -61,7 +61,7 @@ export class APIManager {
     async updateRoute(routeOj:RouteDetails) : Promise<SuccessResponse> {
         try {
             const response = await axios.put<SuccessResponse>(this.queryUrl, routeOj)
-            if (response.status == 201) {
+            if (response.status == 200) {
                 return Promise.resolve(response.data as SuccessResponse)
             } else {
                 const errObj = this.handleInvalidHttp(response)
