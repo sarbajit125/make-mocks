@@ -1,26 +1,5 @@
-export class Posts{
-    id: string;
-   title: string;
-   description: string;
-   endpoint: string;
-   type: string;
-   response: string;
-
-   public constructor( id: string,
-    title: string,
-    description: string,
-    endpoint: string,
-    type: string,
-    response: string) {
-        this.id = id;
-        this.title = title;
-        this.description = description;
-        this.endpoint = endpoint;
-        this.type= type;
-        this.response = response;
-    }
-}
-
+import * as tsCheck from "io-ts";
+import { Route } from "next/dist/server/router";
 export interface RouteDetails {
     id: string;
     title: string;
@@ -45,13 +24,10 @@ export interface SuccessResponse {
 }
 
 export interface ListProps {
-    mocks: RouteDetails[]
+    page_number: number;
+    page_size: number;
+    response: RoutesResponse;
 }
-
-
-export var TableMock = [ new Posts("0","Circle lobby","Get all circle of user", "v1/circle","GET","{}"),
-                    new Posts("1","Circle Dashboard","Get user details in a circle","v1/circle/dashboard","GET","{}"),
-                    new Posts("2","Create circle","Create new circle","v1/create-circle","POST","{}")]
 
 export  const RequestType = ["POST","GET","PUT","DELETE","PATCH"];
 
@@ -66,8 +42,30 @@ export class APIResponseErr extends Error {
         this.timeStamp = timeStamp  
     }
 }
+export interface ApiErrSchema {
+    serviceCode: number;
+    status: ResponseStatus;
+    timeStamp?: string;
+    message: string;
+}
 
-export enum paths {
+export interface RoutesResponse {
+    serviceId: number;
+    message: string;
+    timeStamp: string;
+    routeCount: number;
+    routes: RouteDetails[]
+}
+
+export enum PathsLink {
     dashboard = "/",
     about = "/about"
+}
+
+export const defaultResponse: RoutesResponse  = {
+    serviceId: 0,
+    message: "",
+    timeStamp: "",
+    routeCount: 0,
+    routes: []
 }

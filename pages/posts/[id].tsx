@@ -4,7 +4,7 @@ import InputAdornment from "@mui/material/InputAdornment";
 import MenuItem from "@mui/material/MenuItem";
 import Paper from "@mui/material/Paper";
 import TextField from "@mui/material/TextField";
-import { APIResponseErr, Posts, RequestType, ResponseStatus, ResponseStruct, RouteDetails, SuccessResponse, TableMock } from "../../DTO/components";
+import { APIResponseErr, RequestType, ResponseStatus, ResponseStruct, RouteDetails, SuccessResponse } from "../../DTO/components";
 import Editor from "@monaco-editor/react";
 import ResponsiveAppBar, { NavItemsList } from "../../components/navbar";
 import { ChangeEvent, useState } from "react";

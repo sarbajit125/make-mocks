@@ -1,5 +1,5 @@
 import axios, { AxiosError, AxiosResponse } from "axios";
-import { APIResponseErr, ResponseStatus, ResponseStruct, RouteDetails, SuccessResponse } from "../DTO/components";
+import { ApiErrSchema, APIResponseErr, ResponseStatus, ResponseStruct, RouteDetails, RoutesResponse, SuccessResponse } from "../DTO/components";
 
 
 export class APIManager {
@@ -12,11 +12,15 @@ export class APIManager {
         return APIManager.instance;
     }
     queryUrl = "http://localhost:3000/mocks"
-    async getAllRoutes() : Promise<RouteDetails[]> {
+    async getAllRoutes(page_number: number, page_size: number) : Promise<RoutesResponse> {
         try {
-            const response = await axios.get<RouteDetails[]>(this.queryUrl,{
+            const response = await axios.get<RoutesResponse>(this.queryUrl,{
                 headers: {
                     Accept: 'application/json, text/plain, */*',
+                },
+                params:{
+                    page: page_number,
+                    size: page_size
                 }
             })
             console.log(response.data)
@@ -86,11 +90,12 @@ export class APIManager {
     }
 
     handleCatchedError(error: unknown) : SuccessResponse | Error {
-        if (axios.isAxiosError(error)) {
-            throw new APIResponseErr(error.response?.status ? error.response.status : 400, ResponseStatus.Failure, "", error.response?.statusText)
+        if (axios.isAxiosError(error) && error.response) {
+             const errData = error.response.data as ApiErrSchema
+             throw new APIResponseErr(errData.serviceCode, ResponseStatus.Failure, errData.timeStamp, errData.message)
         } else {
             console.log(error)
-            throw new Error("error could not be validated")
+            throw new APIResponseErr(400, ResponseStatus.Failure, undefined, "Something went wrong")
         }
     }
     handleInvalidHttp(response: AxiosResponse<any, any>) {

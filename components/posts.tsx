@@ -4,7 +4,7 @@ import TableCell from "@mui/material/TableCell";
 import TableContainer from "@mui/material/TableContainer";
 import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
-import { APIResponseErr, ListProps, RouteDetails} from "../DTO/components";
+import { APIResponseErr, ListProps, RouteDetails } from "../DTO/components";
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import Paper from '@mui/material/Paper';
@@ -18,19 +18,19 @@ import AddIcon from '@mui/icons-material/Add';
 import { v4 as uuidv4 } from 'uuid';
 import { APIManager } from "../api/apiManager";
 
-export function EnhancedPosts(props: ListProps) {
+export function EnhancedPosts({page_number, page_size, response}: ListProps) {
     const router = useRouter()
     const [showModal, setShowModal] = useState(false)
     const [toastMessage, setToastMsg] = useState("")
     const [toastColor, setToastColor] = useState<AlertColor>("success")
     const [createId, setCreateId] = useState<string>("")
-    const [rows, setRows] = useState<RouteDetails[]>(props.mocks)
+    const [rows, setRows] = useState<RouteDetails[]>(response.routes)
     const [searchTxt, setSearch] = useState<string>("")
-    const  originalList = props.mocks
+    const  originalList = response.routes
 
     useEffect(() => {
-        setRows(props.mocks)
-    }, [props])  
+        setRows(response.routes)
+    }, [response])  
     function handleDelete(id:string) {
             APIManager.sharedInstance().deleteRoute(id).then((response) => {
                 setToastMsg(response?.message)
