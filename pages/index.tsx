@@ -30,12 +30,12 @@ export default function Home() {
         console.log(err)
       }
     })
-  },[])
+  },[page_number])
   const navItems: [NavItemsList] = [{name:"About", navlink:"/about"}]
   return (
    <div>
      <ResponsiveAppBar items={navItems}/>
-     <EnhancedPosts page_number={0} page_size={0} response={mocks} />
+     <EnhancedPosts page_number={page_number} page_size={page_size} response={mocks} pageCallback={ (pageNo) => { setNewPage(pageNo+1)}} />
      <ShowToast message={toastMsg} color={'error'} open={openToast} onClose={(event) => handleClose(event)} />
     </div>
   )

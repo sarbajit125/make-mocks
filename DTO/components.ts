@@ -26,6 +26,7 @@ export interface ListProps {
     page_number: number;
     page_size: number;
     response: RoutesResponse;
+    pageCallback: (pageNo: number) => void
 }
 
 export  const RequestType = ["POST","GET","PUT","DELETE","PATCH"];

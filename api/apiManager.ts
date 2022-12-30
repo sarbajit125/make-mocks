@@ -1,8 +1,5 @@
 import axios, { AxiosError, AxiosResponse } from "axios";
-import { isLeft } from "fp-ts/lib/These";
 import { ApiErrSchema, APIResponseErr, ResponseStatus, RouteDetails, RoutesResponse, SuccessResponse } from "../DTO/components";
-import {ARouteCodec, RoutesCodec} from "../DTO/codec";
-import { PathReporter } from "io-ts/PathReporter";
 
 
 export class APIManager {
@@ -26,14 +23,8 @@ export class APIManager {
                     size: page_size
                 }
             })
-            if (response.status == 200 ) {
-                const result = RoutesCodec.decode(response.data)
-                if (isLeft(result)) {
-                    console.log(PathReporter.report(result))
-                    throw new APIResponseErr(400, ResponseStatus.Failure, undefined , "unable to validate success response")
-                } else {
-                    return Promise.resolve(result.right as RoutesResponse)
-                }
+            if (response.status == 200 ) {           
+                return Promise.resolve(response.data as RoutesResponse)
             } else {
                 const errObj = this.handleInvalidHttp(response)
                 return Promise.reject(errObj)
@@ -87,13 +78,7 @@ export class APIManager {
         try {
             const response = await axios.get(`${this.queryUrl}/${id}`)
             if (response.status == 200) {
-                const data = ARouteCodec.decode(response.data)
-                if(isLeft(data)) {
-                    console.log(PathReporter.report(data))
-                    throw new APIResponseErr(400, ResponseStatus.Failure, undefined , "unable to validate success response")
-                } else {
-                    return Promise.resolve(data.right.route as RouteDetails)
-                }
+                return Promise.resolve(response.data.route as RouteDetails)
             } else {
                 const errObj = this.handleInvalidHttp(response)
                  return Promise.reject(errObj)
