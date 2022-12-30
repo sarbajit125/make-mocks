@@ -4,10 +4,10 @@ import InputAdornment from "@mui/material/InputAdornment";
 import MenuItem from "@mui/material/MenuItem";
 import Paper from "@mui/material/Paper";
 import TextField from "@mui/material/TextField";
-import { APIResponseErr, RequestType, ResponseStatus, ResponseStruct, RouteDetails, SuccessResponse } from "../../DTO/components";
+import { APIResponseErr, RequestType, RouteDetails} from "../../DTO/components";
 import Editor from "@monaco-editor/react";
 import ResponsiveAppBar, { NavItemsList } from "../../components/navbar";
-import { ChangeEvent, useState } from "react";
+import {useState } from "react";
 import { useFormik } from 'formik';
 import * as yup from 'yup';
 import { useRouter } from 'next/router'
@@ -21,7 +21,7 @@ const validationSchema = yup.object({
     endpointTitle: yup.string().required('Please add title of mock')
 })
 const navLinks: [NavItemsList] = [{name:"Dashboard", navlink:"/"}]
-export default function Blog(props: { isCreate: boolean; post: RouteDetails; }) {
+export default function Blog(props: { isCreate: boolean; post: RouteDetails;}) {
     const [open, setOpen] = useState(false);
     const [toastMsg, setToastmsg] = useState("");
     const [toastColor, setToastColor] = useState<AlertColor>("success")
@@ -170,7 +170,11 @@ export async function getServerSideProps(context: { query: { id: string; isCreat
             const data = await APIManager.sharedInstance().fetchTheRoute(pageId)
             return {props: {post:data, isCreate: queryBool }}
         } catch (error) {
-            
+            console.log(error)
+            return {redirect:{
+                destination: '/posts/errors',
+                permanent: false,
+              },}
         }
     }
 }

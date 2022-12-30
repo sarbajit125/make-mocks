@@ -1,5 +1,4 @@
 import * as tsCheck from "io-ts";
-import { Route } from "next/dist/server/router";
 export interface RouteDetails {
     id: string;
     title: string;
@@ -54,9 +53,15 @@ export interface RoutesResponse {
     message: string;
     timeStamp: string;
     routeCount: number;
-    routes: RouteDetails[]
+    routes: RouteDetails[];
 }
 
+export interface ARouteResponse {
+    serviceId: number;
+    message: string;
+    timeStamp: string;
+    route: RouteDetails;
+}
 export enum PathsLink {
     dashboard = "/",
     about = "/about"
