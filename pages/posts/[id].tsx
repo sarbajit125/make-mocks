@@ -94,7 +94,7 @@ export default function Blog(props: { isCreate: boolean; post: RouteDetails;}) {
              id="endpoint"
              label="Route path"
              variant="outlined"
-             InputProps={{startAdornment: <InputAdornment position="start">ADG</InputAdornment>}}
+             InputProps={{startAdornment: <InputAdornment position="start">{process.env.clientName}</InputAdornment>}}
              value={formik.values.endpoint}
              onBlur={ formik.handleBlur}
              error={formik.touched.endpoint && Boolean(formik.errors.endpoint)}
