@@ -8,27 +8,23 @@ import { APIResponseErr, ListProps, RouteDetails } from "../DTO/components";
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import Paper from '@mui/material/Paper';
-import { AlertColor, Button, IconButton, Toolbar, Tooltip, Typography, Box, TextField, TablePagination } from "@mui/material";
+import {Button, IconButton, Toolbar, Tooltip, Typography, Box, TextField, TablePagination } from "@mui/material";
 import Link from "next/link";
 import { useEffect, useState, useContext } from "react";
-import ShowToast from "./showToast";
 import ConfirmModal from "./confirmModal";
-import { useRouter } from "next/router";
 import AddIcon from '@mui/icons-material/Add';
 import { v4 as uuidv4 } from 'uuid';
 import { APIManager } from "../api/apiManager";
-import { PageContext } from '../contexts/pageContext';
+import { PageContext, ToastContext } from '../contexts/pageContext';
 
-export function EnhancedPosts({ page_size, response}: ListProps) {
-    const router = useRouter()
+export function EnhancedPosts({response}: ListProps) {
     const [showModal, setShowModal] = useState(false)
-    const [toastMessage, setToastMsg] = useState("")
-    const [toastColor, setToastColor] = useState<AlertColor>("success")
+    const [deleteId, setDeleteId] = useState<string>("")
     const [rows, setRows] = useState<RouteDetails[]>(response.routes)
     const [searchTxt, setSearch] = useState<string>("")
-    const [rowsPerPage, setRowsPerPage] = useState<number>(5)
     const  originalList = response.routes
-    const {page_number, setNewPage } = useContext(PageContext)
+    const {page_number, setNewPage, page_size, setPageSize } = useContext(PageContext)
+   const {toastMessage, setToastMsg, toastColor, setToastColor, showToast, setShowToast } = useContext(ToastContext)
     useEffect(() => {
         setRows(response.routes)
     }, [response])  
@@ -36,12 +32,12 @@ export function EnhancedPosts({ page_size, response}: ListProps) {
             APIManager.sharedInstance().deleteRoute(id).then((response) => {
                 setToastMsg(response?.message)
                 setToastColor("success")
-                setAlert(true)
+                setShowToast(true)
             }).catch((err) => {
                 if( err instanceof APIResponseErr) {
                     setToastMsg(err.message)
                     setToastColor("error")
-                    setAlert(true)
+                    setShowToast(true)
                 } else {
                     console.log(err)
                 }
@@ -59,18 +55,11 @@ export function EnhancedPosts({ page_size, response}: ListProps) {
        
     }
     function callModal(id: String) {
+        setDeleteId(id)
         setShowModal(true)
     }
-    let [showAlert, setAlert] = useState(false)
-    const handleToastClose = (event?: React.SyntheticEvent | Event, reason?: string) => {
-        if (reason === 'clickaway') {
-          return;
-        }
-        setAlert(false)
-        router.replace(router.asPath)
-      };
     const handleChangeRowsPerPage = (event: React.ChangeEvent<HTMLInputElement>) => {
-        setRowsPerPage(parseInt(event.target.value, 10));
+        setPageSize(parseInt(event.target.value, 10))
         setNewPage(1)
       };
     const handleChangePage = (event: unknown, newPage: number) => {
@@ -146,16 +135,6 @@ export function EnhancedPosts({ page_size, response}: ListProps) {
                                     </IconButton>   
                                 </Tooltip>                        
                             </TableCell>
-                            <ConfirmModal id={row.id}
-                                        open={showModal}
-                                        title={"Delete the route"}
-                                        desc={"Are you sure you want to delete the route ?"}
-                                        actionBtnTitle={"Delete"}
-                                        actionBtnCallback={function (id: string): void {
-                                            setShowModal(false)
-                                            handleDelete(id)} }
-                                        cancelBtnTitle={"Cancel"}
-                                        cancelBtnAction={function (id: string): void {setShowModal(false)} } />
                         </TableRow>
                     ))}
                 </TableBody>
@@ -165,11 +144,20 @@ export function EnhancedPosts({ page_size, response}: ListProps) {
           rowsPerPageOptions={[5, 10]}
           component="div"
           count={response.routeCount}
-          rowsPerPage={rowsPerPage}
+          rowsPerPage={page_size}
           page={page_number - 1}
           onPageChange={handleChangePage}
           onRowsPerPageChange={handleChangeRowsPerPage}
         />
-     <ShowToast message={toastMessage} open={showAlert} onClose={handleToastClose} color={toastColor}  />
+        <ConfirmModal id={deleteId}
+                    open={showModal}
+                    title={"Delete the route"}
+                     desc={"Are you sure you want to delete the route ?"}
+                    actionBtnTitle={"Delete"}
+                    actionBtnCallback={function (id: string): void {
+                                        setShowModal(false)
+                                        handleDelete(id)} }
+                    cancelBtnTitle={"Cancel"}
+                     cancelBtnAction={function (id: string): void {setShowModal(false)} } />
      </Paper>)
 }

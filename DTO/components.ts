@@ -1,4 +1,5 @@
-import * as tsCheck from "io-ts";
+
+
 import { NavItemsList } from "../components/navbar";
 export interface RouteDetails {
     id: string;
@@ -24,7 +25,6 @@ export interface SuccessResponse {
 }
 
 export interface ListProps {
-    page_size: number;
     response: RoutesResponse;
 }
 

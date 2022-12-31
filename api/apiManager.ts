@@ -11,7 +11,7 @@ export class APIManager {
         }
         return APIManager.instance;
     }
-    queryUrl = process.env.middilewareURL
+    queryUrl = process.env.middilewareURL ?? ""
     async getAllRoutes(page_number: number, page_size: number) : Promise<RoutesResponse> {
         try {
             const response = await axios.get<RoutesResponse>(this.queryUrl,{

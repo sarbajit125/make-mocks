@@ -4,43 +4,51 @@ import { APIManager } from '../api/apiManager';
 import ResponsiveAppBar, { NavItemsList } from '../components/navbar'
 import { EnhancedPosts } from '../components/posts'
 import ShowToast from '../components/showToast';
-import { PageContext } from '../contexts/pageContext';
+import { PageContext, ToastContext } from '../contexts/pageContext';
 import { APIResponseErr, defaultResponse,  RoutesResponse } from '../DTO/components'
+import { AlertColor } from "@mui/material";
+import { useRouter } from "next/router";
 
 export default function Home() {
-
-  const handleClose = (event?: React.SyntheticEvent | Event, reason?: string) => {
+  const handleToastClose = (event?: React.SyntheticEvent | Event, reason?: string) => {
     if (reason === 'clickaway') {
       return;
     }
-    setOpenToast(false)
+    setShowToast(false)
+    router.replace("/")
   };
-  const page_size = 5
+  const router = useRouter()
+  const [page_size, setPageSize] = useState<number>(5)
   const [page_number, setNewPage] = useState<number>(1)
-  const contextValue = {page_number, setNewPage}
-  const [toastMsg, setToastMsg] = useState<string>("")
-  const [openToast, setOpenToast] = useState<boolean>(false)
+  const contextValue = {page_number, setNewPage, page_size, setPageSize}
+  const [toastMessage, setToastMsg] = useState<string>("")
+  const [showToast, setShowToast] = useState<boolean>(false)
   const [mocks, setMocks] = useState<RoutesResponse>(defaultResponse)
+  const [toastColor, setToastColor] = useState<AlertColor>("success")
+  const toastContextVal = {toastMessage, setToastMsg, toastColor, setToastColor, showToast, setShowToast }
   useEffect( () => {
     APIManager.sharedInstance().getAllRoutes(page_number, page_size).then ((res) => {
       setMocks(res)
     }).catch((err) => {
       if (err instanceof APIResponseErr) {
-        setOpenToast(true)
+        setShowToast(true)
         setToastMsg(err.message)
+        setToastColor("error")
       } else {
         console.log(err)
       }
     })
-  },[page_number])
+  },[page_number, page_size])
   const navItems: NavItemsList[] = [{name:"About", navlink:"/about", isExternal: false}]
   return (
     <PageContext.Provider value={contextValue} >
+    <ToastContext.Provider value={toastContextVal} >
    <div>
      <ResponsiveAppBar items={navItems}/>
-     <EnhancedPosts page_size={page_size} response={mocks} />
-     <ShowToast message={toastMsg} color={'error'} open={openToast} onClose={(event) => handleClose(event)} />
+     <EnhancedPosts response={mocks}/>
+    <ShowToast message={toastMessage} open={showToast} onClose={handleToastClose} color={toastColor}  />
     </div>
+    </ToastContext.Provider>
     </PageContext.Provider>
   )
 }
