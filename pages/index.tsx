@@ -33,7 +33,7 @@ export default function Home() {
       }
     })
   },[page_number])
-  const navItems: [NavItemsList] = [{name:"About", navlink:"/about"}]
+  const navItems: NavItemsList[] = [{name:"About", navlink:"/about", isExternal: false}]
   return (
     <PageContext.Provider value={contextValue} >
    <div>

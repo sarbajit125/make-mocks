@@ -1,4 +1,5 @@
 import * as tsCheck from "io-ts";
+import { NavItemsList } from "../components/navbar";
 export interface RouteDetails {
     id: string;
     title: string;
@@ -61,10 +62,6 @@ export interface ARouteResponse {
     timeStamp: string;
     route: RouteDetails;
 }
-export enum PathsLink {
-    dashboard = "/",
-    about = "/about"
-}
 
 export const defaultResponse: RoutesResponse  = {
     serviceId: 0,
@@ -73,3 +70,7 @@ export const defaultResponse: RoutesResponse  = {
     routeCount: 0,
     routes: []
 }
+
+export const ExternalNavItems: NavItemsList[] = [{name:"PrettyJSON", navlink:"https://codebeautify.org/jsonviewer", isExternal: true},
+                                                {name:"ValidateJSON", navlink:"https://jsonlint.com/", isExternal: true},
+                                                {name:"JSONGenerator", navlink:"https://json-generator.com/", isExternal: true} ]

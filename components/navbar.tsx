@@ -4,79 +4,44 @@ import Box from "@mui/material/Box";
 import Toolbar from "@mui/material/Toolbar";
 import IconButton from "@mui/material/IconButton";
 import Typography from "@mui/material/Typography";
-import Menu from "@mui/material/Menu";
 import MenuIcon from "@mui/icons-material/Menu";
 import Button from "@mui/material/Button";
-import MenuItem from "@mui/material/MenuItem";
-import SearchIcon from "@mui/icons-material/Search";
-import { alpha, InputBase, Paper, styled } from "@mui/material";
 import MoreIcon from "@mui/icons-material/MoreVert";
 import Link from "next/link";
-const settings = ["Profile", "Logout"];
-const Search = styled("div")(({ theme }) => ({
-  position: "relative",
-  borderRadius: theme.shape.borderRadius,
-  backgroundColor: alpha(theme.palette.common.white, 0.15),
-  "&:hover": {
-    backgroundColor: alpha(theme.palette.common.white, 0.25),
-  },
-  marginRight: theme.spacing(2),
-  marginLeft: 0,
-  width: "100%",
-  [theme.breakpoints.up("sm")]: {
-    marginLeft: theme.spacing(3),
-    width: "auto",
-  },
-}));
+import { Link as MaterialLink } from "@mui/material";
+import { useState } from "react";
+import { ExternalNavItems } from "../DTO/components";
 function ResponsiveAppBar(props: NavbarProps) {
-  const SearchIconWrapper = styled("div")(({ theme }) => ({
-    padding: theme.spacing(0, 2),
-    height: "100%",
-    position: "absolute",
-    pointerEvents: "none",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-  }));
-  const StyledInputBase = styled(InputBase)(({ theme }) => ({
-    color: "inherit",
-    "& .MuiInputBase-input": {
-      padding: theme.spacing(1, 1, 1, 0),
-      // vertical padding + font size from searchIcon
-      paddingLeft: `calc(1em + ${theme.spacing(4)})`,
-      transition: theme.transitions.create("width"),
-      width: "100%",
-      [theme.breakpoints.up("md")]: {
-        width: "20ch",
-      },
-    },
-  }));
-  const [anchorElUser, setAnchorElUser] = React.useState<null | HTMLElement>(
-    null
-  );
-  const handleOpenUserMenu = (event: React.MouseEvent<HTMLElement>) => {
-    setAnchorElUser(event.currentTarget);
-  };
-  const handleCloseUserMenu = () => {
-    setAnchorElUser(null);
-  };
-
-  function handleMobileMenuOpen(event: React.MouseEvent<HTMLElement>) {
-    setAnchorElUser(event.currentTarget);
+  const [openMenuLeft, setMenuLeft] = useState<null | HTMLElement>(null);
+  const [openMenuRight, setMenuRight] =  useState<null | HTMLElement>(null);
+  function handleRighteMenuOpen(event: React.MouseEvent<HTMLElement>) {
+    setMenuRight(event.currentTarget);
   }
+  const handleLeftMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
+    setMenuLeft(event.currentTarget)
+  }
+  function handleCloseRightmenu() {
+    setMenuRight(null);
+  }
+  const handleCloseLeftmenu = () => {
+    setMenuLeft(null);
+  }
+  
 
   return (
     <AppBar position="static">
-      <Toolbar disableGutters>
+      <Toolbar sx={{justifyContent:"space-between" , justifyItems:"center"}} disableGutters>
         <>
-          <IconButton>
-            <MenuIcon />
+        <Box >
+        <IconButton sx={{display:{xs:"inline", sm:"none"}}}
+         color="inherit"
+         onClick={handleLeftMenuOpen} >
+            <MenuIcon  />
           </IconButton>
-          <Typography noWrap sx={{ display: { xs: "none", sm: "inline" } }}>
+          <Typography noWrap sx={{ display: { xs: "none", sm: "inline" }, ml:3 }}>
             MAKE-MOCKS
           </Typography>
-          <Box sx={{ flexGrow: 1, display: { xs: "none", md: "flex" } }}>
-            {props.items.map((page) => (
+          {props.items.map((page) => (
               <Link
                 key={page.name}
                 href={page.navlink}
@@ -84,46 +49,39 @@ function ResponsiveAppBar(props: NavbarProps) {
               >
                 <Button
                   key={page.name}
-                  sx={{ my: 2, color: "white", display: "inline" }}
+                  sx={{ display:{ xs: "none", sm: "inline"}, color: "white", pb: 1}}
                 >
+                  <Typography noWrap>
                   {page.name}
+                  </Typography>             
                 </Button>
               </Link>
             ))}
-          </Box>
-          <Box>
-            <IconButton
+        </Box>
+        <Box>
+          {ExternalNavItems.map(menu => (
+            <MaterialLink href={menu.navlink} underline="none" color="inherit" target="_blank" rel="noreferrer" key={menu.name}>
+              <Typography noWrap sx={{display:{xs:"none",sm:"inline"} , px:1, mr: 1}}>
+                {menu.name}
+              </Typography>
+            </MaterialLink>
+          ))}
+        <IconButton
               size="large"
               aria-label="show more"
               aria-haspopup="true"
-              onClick={handleMobileMenuOpen}
+              onClick={handleRighteMenuOpen}
               color="inherit"
+              sx={{ display:{xs:"inline",sm:"none"}}}
             >
-              <MoreIcon />
-            </IconButton>
-            <Menu
-              sx={{ mt: "45px" }}
-              id="menu-appbar"
-              anchorEl={anchorElUser}
-              anchorOrigin={{
-                vertical: "top",
-                horizontal: "right",
-              }}
-              keepMounted
-              transformOrigin={{
-                vertical: "top",
-                horizontal: "right",
-              }}
-              open={Boolean(anchorElUser)}
-              onClose={handleCloseUserMenu}
-            >
-              {settings.map((setting) => (
-                <MenuItem key={setting} onClick={handleCloseUserMenu}>
-                  <Typography textAlign="center">{setting}</Typography>
-                </MenuItem>
-              ))}
-            </Menu>
-          </Box>
+          <MoreIcon />
+        </IconButton>
+        {/* <NavMenu navItems={ExternalNavItems}
+         onClose={() => {handleCloseRightmenu}}
+         openMenu={openMenuRight}
+         id={"rightNavMenu"}
+         isLeft={false} /> */}
+        </Box>
         </>
       </Toolbar>
     </AppBar>
@@ -132,10 +90,11 @@ function ResponsiveAppBar(props: NavbarProps) {
 export default ResponsiveAppBar;
 
 export interface NavbarProps {
-  items: [NavItemsList];
+  items: NavItemsList[];
 }
 
 export interface NavItemsList {
   name: string;
   navlink: string;
+  isExternal: boolean;
 }

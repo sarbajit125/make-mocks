@@ -17,10 +17,10 @@ import { APIManager } from "../../api/apiManager";
 
 const validationSchema = yup.object({
     endpoint: yup.string()
-            .matches(/^\/.*/),
+            .matches(/^\/.*/, "path must start with forward slash"),
     endpointTitle: yup.string().required('Please add title of mock')
 })
-const navLinks: [NavItemsList] = [{name:"Dashboard", navlink:"/"}]
+const navLinks: NavItemsList[] = [{name:"Dashboard", navlink:"/", isExternal: false}]
 export default function Blog(props: { isCreate: boolean; post: RouteDetails;}) {
     const [open, setOpen] = useState(false);
     const [toastMsg, setToastmsg] = useState("");
@@ -96,6 +96,8 @@ export default function Blog(props: { isCreate: boolean; post: RouteDetails;}) {
              variant="outlined"
              InputProps={{startAdornment: <InputAdornment position="start">ADG</InputAdornment>}}
              value={formik.values.endpoint}
+             onBlur={ formik.handleBlur}
+             error={formik.touched.endpoint && Boolean(formik.errors.endpoint)}
              helperText={formik.touched.endpoint && formik.errors.endpoint}
              onChange = {formik.handleChange} />
             </Box>
