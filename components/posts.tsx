@@ -10,15 +10,16 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import Paper from '@mui/material/Paper';
 import { AlertColor, Button, IconButton, Toolbar, Tooltip, Typography, Box, TextField, TablePagination } from "@mui/material";
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useContext } from "react";
 import ShowToast from "./showToast";
 import ConfirmModal from "./confirmModal";
 import { useRouter } from "next/router";
 import AddIcon from '@mui/icons-material/Add';
 import { v4 as uuidv4 } from 'uuid';
 import { APIManager } from "../api/apiManager";
+import { PageContext } from '../contexts/pageContext';
 
-export function EnhancedPosts({page_number, page_size, response, pageCallback}: ListProps) {
+export function EnhancedPosts({ page_size, response}: ListProps) {
     const router = useRouter()
     const [showModal, setShowModal] = useState(false)
     const [toastMessage, setToastMsg] = useState("")
@@ -27,7 +28,7 @@ export function EnhancedPosts({page_number, page_size, response, pageCallback}: 
     const [searchTxt, setSearch] = useState<string>("")
     const [rowsPerPage, setRowsPerPage] = useState<number>(5)
     const  originalList = response.routes
-    const [page, setPage] = useState<number>(0);
+    const {page_number, setNewPage } = useContext(PageContext)
     useEffect(() => {
         setRows(response.routes)
     }, [response])  
@@ -70,11 +71,11 @@ export function EnhancedPosts({page_number, page_size, response, pageCallback}: 
       };
     const handleChangeRowsPerPage = (event: React.ChangeEvent<HTMLInputElement>) => {
         setRowsPerPage(parseInt(event.target.value, 10));
-        setPage(0);
+        setNewPage(1)
       };
     const handleChangePage = (event: unknown, newPage: number) => {
-        setPage(newPage);
-        pageCallback(newPage)
+        console.log(newPage + 1)
+        setNewPage(newPage + 1);
       };
     return ( 
         <Paper sx={{ width: '100%', overflow: 'hidden', pt:4 }}>
@@ -165,7 +166,7 @@ export function EnhancedPosts({page_number, page_size, response, pageCallback}: 
           component="div"
           count={response.routeCount}
           rowsPerPage={rowsPerPage}
-          page={page}
+          page={page_number - 1}
           onPageChange={handleChangePage}
           onRowsPerPageChange={handleChangeRowsPerPage}
         />

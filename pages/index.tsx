@@ -1,9 +1,10 @@
 
-import { SetStateAction, useEffect, useState } from 'react';
+import {useEffect, useState} from 'react';
 import { APIManager } from '../api/apiManager';
 import ResponsiveAppBar, { NavItemsList } from '../components/navbar'
 import { EnhancedPosts } from '../components/posts'
 import ShowToast from '../components/showToast';
+import { PageContext } from '../contexts/pageContext';
 import { APIResponseErr, defaultResponse,  RoutesResponse } from '../DTO/components'
 
 export default function Home() {
@@ -16,6 +17,7 @@ export default function Home() {
   };
   const page_size = 5
   const [page_number, setNewPage] = useState<number>(1)
+  const contextValue = {page_number, setNewPage}
   const [toastMsg, setToastMsg] = useState<string>("")
   const [openToast, setOpenToast] = useState<boolean>(false)
   const [mocks, setMocks] = useState<RoutesResponse>(defaultResponse)
@@ -33,11 +35,13 @@ export default function Home() {
   },[page_number])
   const navItems: [NavItemsList] = [{name:"About", navlink:"/about"}]
   return (
+    <PageContext.Provider value={contextValue} >
    <div>
      <ResponsiveAppBar items={navItems}/>
-     <EnhancedPosts page_number={page_number} page_size={page_size} response={mocks} pageCallback={ (pageNo) => { setNewPage(pageNo+1)}} />
+     <EnhancedPosts page_size={page_size} response={mocks} />
      <ShowToast message={toastMsg} color={'error'} open={openToast} onClose={(event) => handleClose(event)} />
     </div>
+    </PageContext.Provider>
   )
 }
 
