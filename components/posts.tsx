@@ -66,6 +66,9 @@ export function EnhancedPosts({response}: ListProps) {
         console.log(newPage + 1)
         setNewPage(newPage + 1);
       };
+    const handleClickAway = () => {
+        setShowModal(false)
+    }
     return ( 
         <Paper sx={{ width: '100%', overflow: 'hidden', pt:4 }}>
             <Toolbar  sx={{pl: { sm: 2 },pr: { xs: 1, sm: 5 }, justifyContent:'space-between'}}>
@@ -154,10 +157,10 @@ export function EnhancedPosts({response}: ListProps) {
                     title={"Delete the route"}
                      desc={"Are you sure you want to delete the route ?"}
                     actionBtnTitle={"Delete"}
-                    actionBtnCallback={function (id: string): void {
+                    actionBtnCallback={(id: string) => {
                                         setShowModal(false)
                                         handleDelete(id)} }
                     cancelBtnTitle={"Cancel"}
-                     cancelBtnAction={function (id: string): void {setShowModal(false)} } />
+                     cancelBtnAction={() => {setShowModal(false)} } />
      </Paper>)
 }

@@ -15,7 +15,8 @@ export default function Home() {
       return;
     }
     setShowToast(false)
-    router.replace("/")
+    console.log("coming here")
+    setRefresh(true)
   };
   const router = useRouter()
   const [page_size, setPageSize] = useState<number>(5)
@@ -23,6 +24,7 @@ export default function Home() {
   const contextValue = {page_number, setNewPage, page_size, setPageSize}
   const [toastMessage, setToastMsg] = useState<string>("")
   const [showToast, setShowToast] = useState<boolean>(false)
+  const [ toRefresh, setRefresh] = useState<boolean> (false)
   const [mocks, setMocks] = useState<RoutesResponse>(defaultResponse)
   const [toastColor, setToastColor] = useState<AlertColor>("success")
   const toastContextVal = {toastMessage, setToastMsg, toastColor, setToastColor, showToast, setShowToast }
@@ -34,11 +36,12 @@ export default function Home() {
         setShowToast(true)
         setToastMsg(err.message)
         setToastColor("error")
+        setRefresh(false)
       } else {
         console.log(err)
       }
     })
-  },[page_number, page_size])
+  },[page_number, page_size, toRefresh ])
   const navItems: NavItemsList[] = [{name:"About", navlink:"/about", isExternal: false}]
   return (
     <PageContext.Provider value={contextValue} >
