@@ -49,7 +49,7 @@ export default function Home() {
    <div>
      <ResponsiveAppBar items={navItems}/>
      <EnhancedPosts response={mocks}/>
-    <ShowToast message={toastMessage} open={showToast} onClose={handleToastClose} color={toastColor}  />
+    <ShowToast message={toastMessage} open={showToast} onClose={handleToastClose} color={toastColor} onCrossClick={handleToastClose}  />
     </div>
     </ToastContext.Provider>
     </PageContext.Provider>
