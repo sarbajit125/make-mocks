@@ -148,7 +148,7 @@ export default function Blog(props: { isCreate: boolean; post: RouteDetails;}) {
             <Button sx={{ width: '20%'}} variant="outlined" color="secondary" type="reset"> Reset</Button>
             </Box> 
             <Box>
-                <ShowToast message={toastMsg} open={open} onClose={handleClose} color={toastColor} />
+                <ShowToast message={toastMsg} open={open} onClose={handleClose} color={toastColor} onCrossClick={handleClose} />
             </Box>
             </form>        
         </Paper>
