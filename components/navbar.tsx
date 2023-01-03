@@ -8,7 +8,7 @@ import MenuIcon from "@mui/icons-material/Menu";
 import Button from "@mui/material/Button";
 import MoreIcon from "@mui/icons-material/MoreVert";
 import Link from "next/link";
-import { Link as MaterialLink } from "@mui/material";
+import { Link as MaterialLink, Menu, MenuItem } from "@mui/material";
 import { useState } from "react";
 import { ExternalNavItems } from "../DTO/components";
 function ResponsiveAppBar(props: NavbarProps) {
@@ -57,6 +57,28 @@ function ResponsiveAppBar(props: NavbarProps) {
                 </Button>
               </Link>
             ))}
+            <Box>
+            <Menu id="left-menu"
+             sx={{ mt: "45px" }}
+             anchorEl={openMenuLeft}
+             anchorOrigin={{
+              vertical: "top",
+              horizontal: "left"
+             }} keepMounted
+             transformOrigin={{
+              vertical: "top",
+              horizontal: "left"
+             }} open ={Boolean(openMenuLeft)}
+              onClose ={handleCloseLeftmenu}>
+                {props.items.map ((item) => (
+                  <Link key={item.name} href={item.navlink} style={{ textDecoration: "none" }}>
+                  <MenuItem key={item.name}>
+                      <Typography textAlign="center">{item.name}</Typography>
+                  </MenuItem>
+              </Link>
+                ))}
+            </Menu>
+            </Box>
         </Box>
         <Box>
           {ExternalNavItems.map(menu => (
@@ -76,11 +98,28 @@ function ResponsiveAppBar(props: NavbarProps) {
             >
           <MoreIcon />
         </IconButton>
-        {/* <NavMenu navItems={ExternalNavItems}
-         onClose={() => {handleCloseRightmenu}}
-         openMenu={openMenuRight}
-         id={"rightNavMenu"}
-         isLeft={false} /> */}
+         <Box>
+         <Menu id="left-menu"
+             sx={{ mt: "45px" }}
+             anchorEl={openMenuRight}
+             anchorOrigin={{
+              vertical: "top",
+              horizontal: "right"
+             }} keepMounted
+             transformOrigin={{
+              vertical: "top",
+              horizontal: "right"
+             }} open ={Boolean(openMenuRight)}
+              onClose ={handleCloseRightmenu}>
+                {ExternalNavItems.map ((item) => (
+                  <MenuItem key={item.name}>
+                   <MaterialLink href={item.navlink} underline="none" color="inherit" target="_blank" rel="noreferrer" key={item.name}>
+                   <Typography textAlign="center">{item.name}</Typography>
+                   </MaterialLink>        
+                  </MenuItem>
+                ))}
+            </Menu>
+         </Box>
         </Box>
         </>
       </Toolbar>

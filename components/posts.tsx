@@ -54,7 +54,7 @@ export function EnhancedPosts({response}: ListProps) {
          }
        
     }
-    function callModal(id: String) {
+    function callModal(id: string) {
         setDeleteId(id)
         setShowModal(true)
     }
