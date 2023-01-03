@@ -1,30 +1,28 @@
-
-import {createContext} from 'react';
+import { createContext } from "react";
 import { AlertColor } from "@mui/material";
 
 export const PageContext = createContext<PageTypeContext>({
-    page_number:1,
-    setNewPage: () => {},
-    page_size: 5,
-    setPageSize: () => {}
-  })
+  page_number: 1,
+  setNewPage: () => {},
+  page_size: 5,
+  setPageSize: () => {},
+});
 
-  
 export type PageTypeContext = {
-    page_number: number
-    setNewPage:(pageNo: number) => void
-    page_size: number
-    setPageSize: (pageSize: number) => void
-  }
+  page_number: number;
+  setNewPage: (pageNo: number) => void;
+  page_size: number;
+  setPageSize: (pageSize: number) => void;
+};
 
 export const ToastContext = createContext<ToastTypeContext>({
   toastMessage: "",
   setToastMsg: () => {},
-  toastColor: 'success',
+  toastColor: "success",
   setToastColor: () => {},
   showToast: false,
-  setShowToast: () => {}
-})
+  setShowToast: () => {},
+});
 
 export type ToastTypeContext = {
   toastMessage: string;
@@ -33,5 +31,4 @@ export type ToastTypeContext = {
   setToastColor: (color: AlertColor) => void;
   showToast: boolean;
   setShowToast: (open: boolean) => void;
-} 
-  
+};
