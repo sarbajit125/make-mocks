@@ -31,6 +31,7 @@ export default function Home() {
   useEffect( () => {
     APIManager.sharedInstance().getAllRoutes(page_number, page_size).then ((res) => {
       setMocks(res)
+      setRefresh(false)
     }).catch((err) => {
       if (err instanceof APIResponseErr) {
         setShowToast(true)
