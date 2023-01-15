@@ -87,3 +87,20 @@ export const ExternalNavItems: NavItemsList[] = [
     isExternal: true,
   },
 ];
+
+export interface LoginReqSchema {
+  username: string;
+  password: string;
+}
+
+export interface LoginSuccessResponse {
+  authToken: string;
+  status: number;
+  userId: string;
+  username: string;
+}
+
+export interface AuthReqSchema  extends LoginReqSchema{
+  userId: string;
+}
+

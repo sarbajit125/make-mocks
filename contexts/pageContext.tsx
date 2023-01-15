@@ -32,3 +32,12 @@ export type ToastTypeContext = {
   showToast: boolean;
   setShowToast: (open: boolean) => void;
 };
+
+export const AuthContext = createContext<AuthTypeContext>({
+  isloggedIn: false,
+  setlogin: () => {},
+})
+export type AuthTypeContext = {
+  isloggedIn: boolean;
+  setlogin: (login: boolean) => void;
+}

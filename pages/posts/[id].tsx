@@ -218,6 +218,7 @@ export default function Blog(props: { isCreate: boolean; post: RouteDetails }) {
   );
 }
 export async function getServerSideProps(context: {
+  req: any;
   query: { id: string; isCreate: string };
 }) {
   let pageId = context.query.id;
@@ -234,7 +235,8 @@ export async function getServerSideProps(context: {
     return { props: { post: data, isCreate: queryBool } };
   } else {
     try {
-      const data = await APIManager.sharedInstance().fetchTheRoute(pageId);
+      console.log()
+      const data = await APIManager.sharedInstance().fetchTheRoute(pageId, context.req.cookies.auth);
       return { props: { post: data, isCreate: queryBool } };
     } catch (error) {
       console.log(error);

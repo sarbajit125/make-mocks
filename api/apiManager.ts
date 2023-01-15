@@ -1,10 +1,12 @@
 import axios, { AxiosError, AxiosResponse } from "axios";
-import { ApiErrSchema, APIResponseErr, ResponseStatus, RouteDetails, RoutesResponse, SuccessResponse } from "../DTO/components";
-
+import { ApiErrSchema, APIResponseErr, LoginReqSchema, LoginSuccessResponse, ResponseStatus, RouteDetails, RoutesResponse, SuccessResponse } from "../DTO/components";
+import Cookies from 'js-cookie'
 
 export class APIManager {
     private static instance: APIManager;
-    private constructor() { }
+    private constructor() {
+        axios.defaults.headers.common['Authorization'] = `Bearer ${Cookies.get('auth')}`
+     }
     public static sharedInstance(): APIManager {
         if (!APIManager.instance) {
             APIManager.instance = new APIManager()
@@ -12,12 +14,10 @@ export class APIManager {
         return APIManager.instance;
     }
     queryUrl = process.env.middilewareURL ?? ""
+    authUrl = "http://localhost:3000"
     async getAllRoutes(page_number: number, page_size: number) : Promise<RoutesResponse> {
         try {
-            const response = await axios.get<RoutesResponse>(this.queryUrl,{
-                headers: {
-                    Accept: 'application/json, text/plain, */*',
-                },
+            const response = await axios.get<RoutesResponse>(this.queryUrl,{              
                 params:{
                     page: page_number,
                     size: page_size
@@ -35,7 +35,8 @@ export class APIManager {
     }
     async deleteRoute(id: string) : Promise<SuccessResponse> {
         try {
-            const response = await axios.delete<SuccessResponse>(this.queryUrl, {params:{id:id}})
+            const response = await axios.delete<SuccessResponse>(this.queryUrl, {
+                params:{id:id}})
             if (response.status == 200) {
                 return Promise.resolve(response.data as SuccessResponse)
             } else {
@@ -74,11 +75,31 @@ export class APIManager {
         }
     }
 
-    async fetchTheRoute(id: String) : Promise<RouteDetails> {
+    async fetchTheRoute(id: String, token: String) : Promise<RouteDetails> {
         try {
-            const response = await axios.get(`${this.queryUrl}/${id}`)
+            const response = await axios.get(`${this.queryUrl}/${id}`,{
+                headers:{
+                    'Authorization': `Bearer ${token}`
+                }
+            })
             if (response.status == 200) {
                 return Promise.resolve(response.data.route as RouteDetails)
+            } else {
+                const errObj = this.handleInvalidHttp(response)
+                 return Promise.reject(errObj)
+            }
+        } catch (error) {
+            throw this.handleCatchedError(error)
+        }
+    }
+
+    async login(loginObj: LoginReqSchema): Promise<LoginSuccessResponse> {
+        try {
+            const response = await axios.post<LoginSuccessResponse>(`${this.authUrl}/auth/login`, loginObj)
+            if (response.status == 201)  {
+                var inFifteenMinutes = new Date(new Date().getTime() + 15 * 60 * 1000);
+                Cookies.set('auth', response.data.authToken, {expires:inFifteenMinutes,})
+                return Promise.resolve(response.data)
             } else {
                 const errObj = this.handleInvalidHttp(response)
                  return Promise.reject(errObj)
