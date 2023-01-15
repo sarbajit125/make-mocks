@@ -8,14 +8,21 @@ import {
   Avatar,
   Button,
   Grid,
-  Link,
+  Link as MaterialLink,
   Typography,
+  AlertColor,
 } from "@mui/material";
 import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
-import { LoginReqSchema, LoginSuccessResponse } from "../../DTO/components";
+import {
+  APIResponseErr,
+  LoginReqSchema,
+  LoginSuccessResponse,
+} from "../../DTO/components";
 import { APIManager } from "../../api/apiManager";
 import { AuthContext } from "../../contexts/pageContext";
-import  Router  from "next/router";
+import Router from "next/router";
+import Link from "next/link";
+import ShowToast from "../../components/showToast";
 const validationSchema = yup.object({
   username: yup.string().email("please enter valid email id"),
   password: yup
@@ -24,7 +31,11 @@ const validationSchema = yup.object({
     .min(4, "password length cannot be less than 4"),
 });
 export default function SignIn() {
-  const {isloggedIn, setlogin} = React.useContext(AuthContext)
+  const { isloggedIn, setlogin } = React.useContext(AuthContext);
+  const [showToast, setToast] = React.useState<boolean>(false);
+  const [toastColor, setToastColor] = React.useState<AlertColor>("info");
+  const [message, setMessage] = React.useState<string>("");
+  const [isSucess, setSuccess] = React.useState<boolean>(false);
   const formik = useFormik({
     initialValues: {
       username: "",
@@ -34,19 +45,43 @@ export default function SignIn() {
     onSubmit: (values) => {
       const payload: LoginReqSchema = {
         username: values.username,
-        password: values.password
-      }
-      handleLogin(payload)
+        password: values.password,
+      };
+      handleLogin(payload);
     },
   });
-  async function handleLogin(loginObj: LoginReqSchema ) {
+  function hanldeSnackbar(
+    event?: React.SyntheticEvent | Event,
+    reason?: string
+  ) {
+    if (reason === "clickaway") {
+      return;
+    }
+    setToast(false);
+    setMessage("");
+    if (isSucess) {
+      setlogin(true);
+      Router.push("/");
+    }
+  }
+  async function handleLogin(loginObj: LoginReqSchema) {
     try {
-      const response:LoginSuccessResponse = await APIManager.sharedInstance().login(loginObj)
-        setlogin(true)
-        Router.push('/')
+      const response: LoginSuccessResponse =
+        await APIManager.sharedInstance().login(loginObj);
+      setMessage("Login successfull, redirecting to dashboard");
+      setToast(true);
+      setToastColor("success");
+      setSuccess(true);
     } catch (error) {
-      console.log(error)
-      setlogin(false)
+      setlogin(false);
+      setSuccess(false);
+      if (error instanceof APIResponseErr) {
+        setMessage(error.message);
+        setToast(true);
+        setToastColor("error");
+      } else {
+        console.log(error);
+      }
     }
   }
   return (
@@ -73,12 +108,13 @@ export default function SignIn() {
             fullWidth
             required
             id="username"
-            label="email"
+            label="Email"
             value={formik.values.username}
             onBlur={formik.handleBlur}
             error={formik.touched.username && Boolean(formik.errors.username)}
             helperText={formik.touched.username && formik.errors.username}
             onChange={formik.handleChange}
+            autoFocus
           />
         </Box>
         <Box sx={{ pt: 3, px: 1 }}>
@@ -86,7 +122,7 @@ export default function SignIn() {
             fullWidth
             required
             id="password"
-            label="password"
+            label="Password"
             type="password"
             value={formik.values.password}
             onBlur={formik.handleBlur}
@@ -106,16 +142,27 @@ export default function SignIn() {
       </form>
       <Grid container>
         <Grid item xs>
-          <Link href="#" variant="body2">
+          <MaterialLink href="#" variant="body2">
             Forgot password?
-          </Link>
+          </MaterialLink>
         </Grid>
         <Grid item>
-          <Link href="#" variant="body2">
+          <MaterialLink component={Link} href="/register" variant="body2">
             {"Don't have an account? Sign Up"}
-          </Link>
+          </MaterialLink>
         </Grid>
       </Grid>
+      <ShowToast
+        open={showToast}
+        message={message}
+        color={toastColor}
+        onClose={(event) => {
+          hanldeSnackbar(event);
+        }}
+        onCrossClick={(event) => {
+          hanldeSnackbar(event);
+        }}
+      />
     </Container>
   );
 }
