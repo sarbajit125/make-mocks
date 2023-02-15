@@ -28,9 +28,6 @@ export default function Home() {
   const toastContextVal = {toastMessage, setToastMsg, toastColor, setToastColor, showToast, setShowToast }
   const {isloggedIn, setlogin} = useContext(AuthContext)
   useEffect( () => {
-    if (!isloggedIn) {
-      Router.push('/login')
-    } else {
       APIManager.sharedInstance().getAllRoutes(page_number, page_size).then ((res) => {
         setMocks(res)
         setRefresh(false)
@@ -44,8 +41,7 @@ export default function Home() {
         } else {
           console.log(err)
         }
-      })
-    }     
+      })    
   },[page_number, page_size, toRefresh, isloggedIn])
   const navItems: NavItemsList[] = [{name:"About", navlink:"/about", isExternal: false}]
   return (

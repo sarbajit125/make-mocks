@@ -15,9 +15,6 @@ import Cookies from "js-cookie";
 export class APIManager {
   private static instance: APIManager;
   private constructor() {
-    axios.defaults.headers.common["Authorization"] = `Bearer ${Cookies.get(
-      "auth"
-    )}`;
   }
   public static sharedInstance(): APIManager {
     if (!APIManager.instance) {
@@ -97,9 +94,6 @@ export class APIManager {
   async fetchTheRoute(id: String, token: String): Promise<RouteDetails> {
     try {
       const response = await axios.get(`${this.queryUrl}/${id}`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
       });
       if (response.status == 200) {
         return Promise.resolve(response.data.route as RouteDetails);
