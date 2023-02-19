@@ -1,4 +1,4 @@
-import axios, { AxiosError, AxiosResponse } from "axios";
+import axios, { AxiosError, AxiosInstance, AxiosResponse } from "axios";
 import {
   ApiErrSchema,
   APIResponseErr,
@@ -14,7 +14,11 @@ import Cookies from "js-cookie";
 
 export class APIManager {
   private static instance: APIManager;
+  axiosInstance: AxiosInstance;
   private constructor() {
+    this.axiosInstance = axios.create({
+      baseURL: "http://localhost:3000/"
+    })
   }
   public static sharedInstance(): APIManager {
     if (!APIManager.instance) {
@@ -22,17 +26,19 @@ export class APIManager {
     }
     return APIManager.instance;
   }
+  //http://localhost:3000/mocks
   queryUrl = process.env.middilewareURL ?? "";
-  authUrl = "http://localhost:3000";
+  authUrl = "";
   async getAllRoutes(
     page_number: number,
     page_size: number
   ): Promise<RoutesResponse> {
     try {
-      const response = await axios.get<RoutesResponse>(this.queryUrl, {
+      const response = await this.axiosInstance.get<RoutesResponse>('mocks', {
         params: {
           page: page_number,
           size: page_size,
+          domain: 'mfs'
         },
       });
       if (response.status == 200) {
@@ -47,7 +53,7 @@ export class APIManager {
   }
   async deleteRoute(id: string): Promise<SuccessResponse> {
     try {
-      const response = await axios.delete<SuccessResponse>(this.queryUrl, {
+      const response = await this.axiosInstance.delete<SuccessResponse>('mocks', {
         params: { id: id },
       });
       if (response.status == 200) {
@@ -62,8 +68,8 @@ export class APIManager {
   }
   async createRoute(routeObj: RouteDetails): Promise<SuccessResponse> {
     try {
-      const response = await axios.post<SuccessResponse>(
-        this.queryUrl,
+      const response = await this.axiosInstance.post<SuccessResponse>(
+        'mocks',
         routeObj
       );
       if (response.status == 201) {
@@ -79,7 +85,7 @@ export class APIManager {
 
   async updateRoute(routeOj: RouteDetails): Promise<SuccessResponse> {
     try {
-      const response = await axios.put<SuccessResponse>(this.queryUrl, routeOj);
+      const response = await this.axiosInstance.put<SuccessResponse>('mocks', routeOj);
       if (response.status == 200) {
         return Promise.resolve(response.data as SuccessResponse);
       } else {
@@ -93,7 +99,7 @@ export class APIManager {
 
   async fetchTheRoute(id: String, token: String): Promise<RouteDetails> {
     try {
-      const response = await axios.get(`${this.queryUrl}/${id}`, {
+      const response = await this.axiosInstance.get(`mocks/${id}`, {
       });
       if (response.status == 200) {
         return Promise.resolve(response.data.route as RouteDetails);
@@ -108,8 +114,8 @@ export class APIManager {
 
   async login(loginObj: LoginReqSchema): Promise<LoginSuccessResponse> {
     try {
-      const response = await axios.post<LoginSuccessResponse>(
-        `${this.authUrl}/auth/login`,
+      const response = await this.axiosInstance.post<LoginSuccessResponse>(
+        `auth/login`,
         loginObj
       );
       if (response.status == 201) {
@@ -130,8 +136,8 @@ export class APIManager {
   async register(userObj: AuthReqSchema): Promise<SuccessResponse> {
     try {
       console.log(userObj);
-      const response = await axios.post<SuccessResponse>(
-        `${this.authUrl}/auth/register`,
+      const response = await this.axiosInstance.post<SuccessResponse>(
+        `auth/register`,
         userObj
       );
       if (response.status == 201) {
