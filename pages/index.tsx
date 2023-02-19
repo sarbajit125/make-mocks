@@ -10,6 +10,7 @@ import { AlertColor } from "@mui/material";
 import Router from 'next/router'
 import { dehydrate, QueryClient } from 'react-query';
 import { getAllDomains } from '../DTO/queryHooks';
+import DomainGrid from '../components/DomainGrid';
 export default function Home() {
   const handleToastClose = (event?: React.SyntheticEvent | Event, reason?: string) => {
     if (reason === 'clickaway') {
@@ -29,10 +30,6 @@ export default function Home() {
   const [toastColor, setToastColor] = useState<AlertColor>("success")
   const toastContextVal = {toastMessage, setToastMsg, toastColor, setToastColor, showToast, setShowToast }
   const {isloggedIn, setlogin} = useContext(AuthContext)
-  const getQuery = getAllDomains()
-  if (getQuery.isSuccess) {
-    console.log(getQuery.data)
-  }
   useEffect( () => {
       APIManager.sharedInstance().getAllRoutes(page_number, page_size).then ((res) => {
         setMocks(res)
@@ -55,7 +52,7 @@ export default function Home() {
     <ToastContext.Provider value={toastContextVal} >
    <div>
      <ResponsiveAppBar items={navItems}/>
-     <EnhancedPosts response={mocks}/>
+     <DomainGrid />
     <ShowToast message={toastMessage} open={showToast} onClose={handleToastClose} color={toastColor} onCrossClick={handleToastClose}  />
     </div>
     </ToastContext.Provider>

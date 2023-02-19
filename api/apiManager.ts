@@ -159,13 +159,8 @@ export class APIManager {
       console.log(error);
     }
   }
-  async fetechAllDomains () {
-    try {
-      const response = await this.axiosInstance.get<DomainDTO[]>('domains')
-      return response.data
-    } catch (error) {
-      console.log(error);
-    }
+   fetechAllDomains () {
+    return this.axiosInstance.get<DomainDTO[]>('domains').then((response) => response.data)
   }
 
   handleCatchedError(error: unknown): SuccessResponse | Error {
