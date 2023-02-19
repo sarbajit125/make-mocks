@@ -3,6 +3,7 @@ import {
   ApiErrSchema,
   APIResponseErr,
   AuthReqSchema,
+  DomainDTO,
   LoginReqSchema,
   LoginSuccessResponse,
   ResponseStatus,
@@ -154,6 +155,14 @@ export class APIManager {
   async Logout() {
     try {
       Cookies.remove("auth");
+    } catch (error) {
+      console.log(error);
+    }
+  }
+  async fetechAllDomains () {
+    try {
+      const response = await this.axiosInstance.get<DomainDTO[]>('domains')
+      return response.data
     } catch (error) {
       console.log(error);
     }

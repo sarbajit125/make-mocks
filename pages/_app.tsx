@@ -1,14 +1,23 @@
 import '../styles/globals.css'
 import type { AppProps } from 'next/app'
-import { AuthContext } from '../contexts/pageContext'
-import {useState} from 'react';
+import React from 'react';
+import { QueryClient, QueryClientProvider, Hydrate } from 'react-query';
 export default function App({ Component, pageProps }: AppProps) {
-  const [isloggedIn, setlogin] = useState<boolean>(false)
-  const contextValue = {isloggedIn, setlogin}
+  const twentyFourHoursInMs = 1000 * 60 * 60 * 24;
+  const [queryClient] = React.useState(() => new QueryClient({
+    defaultOptions:{
+      queries:{
+        staleTime:  twentyFourHoursInMs,
+        notifyOnChangeProps: 'tracked',
+      }
+    }
+  }));
     return (
-  <AuthContext.Provider value={contextValue}>
-    <Component {...pageProps} />
-    </AuthContext.Provider> 
+      <QueryClientProvider client={queryClient}>
+      <Hydrate state={pageProps.dehydratedState}>
+        <Component {...pageProps} />
+      </Hydrate>
+    </QueryClientProvider>
   ) 
   
 }

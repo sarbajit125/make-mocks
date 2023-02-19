@@ -8,6 +8,8 @@ import { AuthContext, PageContext, ToastContext } from '../contexts/pageContext'
 import { APIResponseErr, defaultResponse,  RoutesResponse } from '../DTO/components'
 import { AlertColor } from "@mui/material";
 import Router from 'next/router'
+import { dehydrate, QueryClient } from 'react-query';
+import { getAllDomains } from '../DTO/queryHooks';
 export default function Home() {
   const handleToastClose = (event?: React.SyntheticEvent | Event, reason?: string) => {
     if (reason === 'clickaway') {
@@ -27,6 +29,10 @@ export default function Home() {
   const [toastColor, setToastColor] = useState<AlertColor>("success")
   const toastContextVal = {toastMessage, setToastMsg, toastColor, setToastColor, showToast, setShowToast }
   const {isloggedIn, setlogin} = useContext(AuthContext)
+  const getQuery = getAllDomains()
+  if (getQuery.isSuccess) {
+    console.log(getQuery.data)
+  }
   useEffect( () => {
       APIManager.sharedInstance().getAllRoutes(page_number, page_size).then ((res) => {
         setMocks(res)
@@ -56,4 +62,18 @@ export default function Home() {
     </PageContext.Provider>
   )
 }
+
+export async function  getStaticProps() {
+  const queryClient = new QueryClient();
+  await queryClient.prefetchQuery({
+    queryKey: ['domains'],
+    queryFn: () => APIManager.sharedInstance().fetechAllDomains()
+  })
+  return {
+    props: {
+      dehydratedState: dehydrate(queryClient)
+    }
+  };
+  
+} 
 

@@ -103,4 +103,8 @@ export interface LoginSuccessResponse {
 export interface AuthReqSchema  extends LoginReqSchema{
   userId: string;
 }
-
+export interface DomainDTO {
+  id: string;
+  name: string;
+  desc: string;
+}
