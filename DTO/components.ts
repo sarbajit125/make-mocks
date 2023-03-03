@@ -2,15 +2,21 @@ import { NavItemsList } from "../components/navbar";
 export interface RouteDetails {
   id: string;
   title: string;
-  description: string;
   endpoint: string;
   type: string;
   response: string;
+  statusCode: number;
+  headers?: HeaderTableModel[];
+  domain: string;
 }
 export enum ResponseStatus {
   Success,
   Failure,
   Pending,
+}
+export interface CustomHeaders {
+  key: string;
+  value: string;
 }
 
 export interface ResponseStruct extends SuccessResponse {
@@ -56,6 +62,7 @@ export interface RoutesResponse {
   message: string;
   timeStamp: string;
   routeCount: number;
+  domain: string;
   routes: RouteDetails[];
 }
 
@@ -71,6 +78,7 @@ export const defaultResponse: RoutesResponse = {
   message: "",
   timeStamp: "",
   routeCount: 0,
+  domain: "",
   routes: [],
 };
 
@@ -100,11 +108,31 @@ export interface LoginSuccessResponse {
   username: string;
 }
 
-export interface AuthReqSchema  extends LoginReqSchema{
+export interface AuthReqSchema extends LoginReqSchema {
   userId: string;
 }
 export interface DomainDTO {
   id: string;
   name: string;
   desc: string;
+}
+export interface HTTPStatus {
+  name: string;
+  code: number;
+}
+
+export const HTTPStatusList: HTTPStatus[] = [
+  { code: 200, name: "SUCCESS" },
+  { code: 201, name: "CREATED" },
+  { code: 400, name: "BADREQUEST" },
+  { code: 500, name: "INTERNAL SERVER ERROR" },
+];
+
+export interface HeaderTableModel extends CustomHeaders {
+  id: string,
+}
+export interface CreateDomainReq {
+  id: string,
+  name: string,
+  desc?: string
 }

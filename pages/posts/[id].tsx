@@ -6,36 +6,57 @@ import Paper from "@mui/material/Paper";
 import TextField from "@mui/material/TextField";
 import {
   APIResponseErr,
+  HeaderTableModel,
+  HTTPStatusList,
   RequestType,
   RouteDetails,
 } from "../../DTO/components";
 import Editor from "@monaco-editor/react";
 import ResponsiveAppBar, { NavItemsList } from "../../components/navbar";
-import { useState } from "react";
+import { ChangeEvent, useState } from "react";
 import { useFormik } from "formik";
 import * as yup from "yup";
 import { useRouter } from "next/router";
 import ShowToast from "../../components/showToast";
-import { AlertColor } from "@mui/material";
+import {
+  AlertColor,
+  IconButton,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Tooltip,
+} from "@mui/material";
 import { APIManager } from "../../api/apiManager";
-
+import RemoveIcon from "@mui/icons-material/Remove";
+import AddIcon from "@mui/icons-material/Add";
+import { v4 as uuidv4 } from "uuid";
+import {styled } from '@mui/material/styles';
+import { useQueryClient } from "react-query";
 const validationSchema = yup.object({
   endpoint: yup.string().matches(/^\/.*/, "path must start with forward slash"),
   endpointTitle: yup.string().required("Please add title of mock"),
 });
-const navLinks: NavItemsList[] = [
-  { name: "Dashboard", navlink: "/", isExternal: false },
-];
+
 export default function Blog(props: { isCreate: boolean; post: RouteDetails }) {
+  const navLinks: NavItemsList[] = [
+    { name: "Dashboard", navlink: `/mocks?id=${props.post.domain}`, isExternal: false },
+  ];
+  const [headerArr, setheaderArr] = useState<HeaderTableModel[]>(props.post?.headers ?? []);
   const [open, setOpen] = useState(false);
   const [toastMsg, setToastmsg] = useState("");
   const [toastColor, setToastColor] = useState<AlertColor>("success");
   const router = useRouter();
+  const queryClient = useQueryClient()
   function submitRoute(isCreate: boolean, mock: RouteDetails) {
     if (isCreate) {
       APIManager.sharedInstance()
         .createRoute(mock)
         .then((response) => {
+          queryClient.invalidateQueries('mocks')
+          router.back()
           setToastmsg(response.message);
           setOpen(true);
         })
@@ -51,6 +72,8 @@ export default function Blog(props: { isCreate: boolean; post: RouteDetails }) {
       APIManager.sharedInstance()
         .updateRoute(mock)
         .then((response) => {
+          queryClient.invalidateQueries('mocks')
+          router.back()
           setToastmsg(response.message);
           setToastColor("success");
           setOpen(true);
@@ -71,8 +94,8 @@ export default function Blog(props: { isCreate: boolean; post: RouteDetails }) {
     initialValues: {
       endpoint: props.post.endpoint,
       endpointHTTP: props.post.type,
+      endpointCode: props.post.statusCode,
       endpointTitle: props.post.title,
-      endpointDesc: props.post.description,
       endpointResp: props.post.response,
     },
     validationSchema: validationSchema,
@@ -80,10 +103,12 @@ export default function Blog(props: { isCreate: boolean; post: RouteDetails }) {
       let payload: RouteDetails = {
         id: props.post.id,
         title: values.endpointTitle,
-        description: values.endpointDesc,
         endpoint: values.endpoint,
         type: values.endpointHTTP,
         response: values.endpointResp,
+        statusCode: values.endpointCode,
+        domain: props.post.domain,
+        headers: headerArr,
       };
       submitRoute(props.isCreate, payload);
     },
@@ -96,7 +121,30 @@ export default function Blog(props: { isCreate: boolean; post: RouteDetails }) {
       return;
     }
     setOpen(false);
-    router.push("/");
+  };
+  const handleCellTextChange = (
+    event: ChangeEvent<HTMLTextAreaElement | HTMLInputElement>,
+    id: string
+  ) => {
+    const { value, name } = event.target;
+    const newRows = headerArr.map((item) =>
+      item.id === id && name ? { ...item, [name]: value } : item
+    );
+    setheaderArr(newRows);
+  };
+  const deleteheaderRow = (id: string) => {
+    const newArr = headerArr.filter((item) => item.id != id);
+    setheaderArr(newArr);
+  };
+  const addAnotherCell = () => {
+    setheaderArr([
+      ...headerArr,
+      {
+        id: uuidv4(),
+        key: "key",
+        value: "",
+      },
+    ]);
   };
   return (
     <Paper>
@@ -111,7 +159,7 @@ export default function Blog(props: { isCreate: boolean; post: RouteDetails }) {
             InputProps={{
               startAdornment: (
                 <InputAdornment position="start">
-                  {process.env.clientName}
+                  {props.post.domain}
                 </InputAdornment>
               ),
             }}
@@ -122,7 +170,7 @@ export default function Blog(props: { isCreate: boolean; post: RouteDetails }) {
             onChange={formik.handleChange}
           />
         </Box>
-        <Box sx={{ pt: 3, px: 1 }}>
+        <Box sx={{ pt: 3, px: 5, display: "inline-flex" }}>
           <TextField
             id="endpointHTTP"
             select
@@ -135,6 +183,22 @@ export default function Blog(props: { isCreate: boolean; post: RouteDetails }) {
             {RequestType.map((request) => (
               <MenuItem key={request} value={request}>
                 {request}
+              </MenuItem>
+            ))}
+          </TextField>
+          <TextField
+            id="endpointCode"
+            select
+            label="select"
+            name="endpointCode"
+            value={formik.values.endpointCode}
+            helperText="Please select response status"
+            onChange={formik.handleChange}
+            sx={{ml: 5, px: 2}}
+          >
+            {HTTPStatusList.map((request) => (
+              <MenuItem key={request.code} value={request.code}>
+                {request.name}
               </MenuItem>
             ))}
           </TextField>
@@ -156,15 +220,60 @@ export default function Blog(props: { isCreate: boolean; post: RouteDetails }) {
             onChange={formik.handleChange}
           />
         </Box>
-        <Box sx={{ pt: 3, px: 1 }}>
-          <TextField
-            fullWidth
-            id="endpointDesc"
-            label="Description of Mock"
-            value={formik.values.endpointDesc}
-            onChange={formik.handleChange}
-          />
-        </Box>
+        <TableContainer
+          sx={{
+            width: "50%",
+            display: "flex",
+            mt: 5,
+            px: 3,
+          }}
+        >
+          <Table size="small">
+            <caption>Enter headers for response</caption>
+            <TableHead>
+              <TableRow>
+                <TableCell>
+                  <Tooltip title="add another header">
+                    <IconButton onClick={addAnotherCell}>
+                      <AddIcon />
+                    </IconButton>
+                  </Tooltip>
+                </TableCell>
+                <TableCell>Header Key</TableCell>
+                <TableCell>Header value</TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {headerArr.map((row) => (
+                <TableRow key={row.id}>
+                  <TableCell>
+                    <Tooltip title={"delete this row"}>
+                      <IconButton onClick={() => deleteheaderRow(row.id)}>
+                        <RemoveIcon />
+                      </IconButton>
+                    </Tooltip>
+                  </TableCell>
+                  <TableCell>
+                    <TextField
+                      variant="filled"
+                      value={row.key}
+                      name="key"
+                      onChange={(event) => handleCellTextChange(event, row.id)}
+                    />
+                  </TableCell>
+                  <HeaderCell>
+                    <TextField
+                      variant="filled"
+                      value={row.value}
+                      name="value"
+                      onChange={(event) => handleCellTextChange(event, row.id)}
+                    />
+                  </HeaderCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </TableContainer>
         <Box sx={{ pt: 3, px: 1 }} justifyContent="center" display="flex">
           <Editor
             height="80vh"
@@ -219,7 +328,7 @@ export default function Blog(props: { isCreate: boolean; post: RouteDetails }) {
 }
 export async function getServerSideProps(context: {
   req: any;
-  query: { id: string; isCreate: string };
+  query: { id: string; isCreate: string; groupName: string };
 }) {
   let pageId = context.query.id;
   const queryBool: boolean = context.query.isCreate === "true" ? true : false;
@@ -227,16 +336,17 @@ export async function getServerSideProps(context: {
     const data: RouteDetails = {
       id: pageId,
       title: "",
-      description: "",
       endpoint: "/",
       type: "POST",
       response: "// some response here",
+      statusCode: 0,
+      domain: context.query.groupName,
     };
     return { props: { post: data, isCreate: queryBool } };
   } else {
     try {
-      console.log()
-      const data = await APIManager.sharedInstance().fetchTheRoute(pageId, context.req.cookies.auth);
+      console.log();
+      const data = await APIManager.sharedInstance().fetchTheRoute(pageId);
       return { props: { post: data, isCreate: queryBool } };
     } catch (error) {
       console.log(error);
@@ -249,3 +359,7 @@ export async function getServerSideProps(context: {
     }
   }
 }
+
+const HeaderCell = styled(TableCell)(({theme}) => ({
+  width: 130,
+}))

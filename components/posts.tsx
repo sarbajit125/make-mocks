@@ -4,7 +4,7 @@ import TableCell from "@mui/material/TableCell";
 import TableContainer from "@mui/material/TableContainer";
 import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
-import { APIResponseErr, ListProps, RouteDetails } from "../DTO/components";
+import { APIResponseErr } from "../DTO/components";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import Paper from "@mui/material/Paper";
@@ -19,21 +19,22 @@ import {
   TablePagination,
 } from "@mui/material";
 import Link from "next/link";
-import { useEffect, useState, useContext } from "react";
+import { useState, useContext } from "react";
 import ConfirmModal from "./confirmModal";
 import AddIcon from "@mui/icons-material/Add";
 import { v4 as uuidv4 } from "uuid";
 import { APIManager } from "../api/apiManager";
-import { PageContext, ToastContext } from "../contexts/pageContext";
+import { ToastContext } from "../contexts/pageContext";
+import { getAllRoutes } from "../DTO/queryHooks";
+import { useRouter } from "next/router";
 
-export function EnhancedPosts({ response }: ListProps) {
+export function EnhancedPosts() {
+  const router = useRouter()
   const [showModal, setShowModal] = useState(false);
   const [deleteId, setDeleteId] = useState<string>("");
-  const [rows, setRows] = useState<RouteDetails[]>(response.routes);
+  const [page_number, setNewPage] = useState<number>(1);
+  const [page_size, setPageSize] = useState<number>(5);
   const [searchTxt, setSearch] = useState<string>("");
-  const originalList = response.routes;
-  const { page_number, setNewPage, page_size, setPageSize } =
-    useContext(PageContext);
   const {
     toastMessage,
     setToastMsg,
@@ -42,57 +43,13 @@ export function EnhancedPosts({ response }: ListProps) {
     showToast,
     setShowToast,
   } = useContext(ToastContext);
-  useEffect(() => {
-    setRows(response.routes);
-  }, [response]);
-  function handleDelete(id: string) {
-    APIManager.sharedInstance()
-      .deleteRoute(id)
-      .then((response) => {
-        setToastMsg(response?.message);
-        setToastColor("success");
-        setShowToast(true);
-      })
-      .catch((err) => {
-        if (err instanceof APIResponseErr) {
-          setToastMsg(err.message);
-          setToastColor("error");
-          setShowToast(true);
-        } else {
-          console.log(err);
-        }
-      });
-  }
-  function handleFilter(inputTxt: string) {
-    setSearch(inputTxt);
-    if (inputTxt.length > 0) {
-      let filterData: RouteDetails[] = originalList.filter((data) =>
-        data.title.toLowerCase().includes(inputTxt.toLowerCase())
-      );
-      setRows(filterData);
-    } else {
-      setRows(originalList);
-    }
-  }
-  function callModal(id: string) {
-    setDeleteId(id);
-    setShowModal(true);
-  }
-  const handleChangeRowsPerPage = (
-    event: React.ChangeEvent<HTMLInputElement>
-  ) => {
-    setPageSize(parseInt(event.target.value, 10));
-    setNewPage(1);
-  };
-  const handleChangePage = (event: unknown, newPage: number) => {
-    console.log(newPage + 1);
-    setNewPage(newPage + 1);
-  };
-  const handleClickAway = () => {
-    setShowModal(false);
-  };
-  return (
-    <Paper sx={{ width: "100%", overflow: "hidden", pt: 4 }}>
+  const domainId = typeof router.query.id === 'string' ? router.query.id : ""
+  const {data, isSuccess} = getAllRoutes(page_number, page_size, domainId, searchTxt)
+
+  const renderResult = () => {
+    if (isSuccess) {
+      return (
+        <Paper sx={{ width: "100%", overflow: "hidden", pt: 4 }}>
       <Toolbar
         sx={{
           pl: { sm: 2 },
@@ -102,7 +59,7 @@ export function EnhancedPosts({ response }: ListProps) {
       >
         <Box>
           <Typography variant="h6" component="div">
-            {rows.length} Routes available
+            {data.routeCount} Routes available
           </Typography>
         </Box>
         <Box>
@@ -119,7 +76,7 @@ export function EnhancedPosts({ response }: ListProps) {
             <Link
               href={{
                 pathname: `/posts/${uuidv4()}`,
-                query: { isCreate: true },
+                query: { isCreate: true, groupName: data.domain },
               }}
               style={{ textDecoration: "none" }}
               prefetch={false}
@@ -143,23 +100,23 @@ export function EnhancedPosts({ response }: ListProps) {
               <TableCell>Title</TableCell>
               <TableCell>Endpoint</TableCell>
               <TableCell>Request type</TableCell>
-              <TableCell>Description</TableCell>
+              <TableCell>Status code</TableCell>
               <TableCell>Actions</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
-            {rows.map((row) => (
+            {data.routes.map((row) => (
               <TableRow key={row.id}>
                 <TableCell>{row.title}</TableCell>
                 <TableCell>{row.endpoint}</TableCell>
                 <TableCell>{row.type}</TableCell>
-                <TableCell>{row.description}</TableCell>
+                <TableCell>{row.statusCode}</TableCell>
                 <TableCell>
                   <Tooltip title="Edit the mock">
                     <Link
                       href={{
                         pathname: `/posts/${row.id}`,
-                        query: { isCreate: false },
+                        query: { isCreate: false, groupName: row.domain },
                       }}
                       passHref
                     >
@@ -182,7 +139,7 @@ export function EnhancedPosts({ response }: ListProps) {
       <TablePagination
         rowsPerPageOptions={[5, 10]}
         component="div"
-        count={response.routeCount}
+        count={data.routeCount}
         rowsPerPage={page_size}
         page={page_number - 1}
         onPageChange={handleChangePage}
@@ -204,5 +161,63 @@ export function EnhancedPosts({ response }: ListProps) {
         }}
       />
     </Paper>
+      )
+    } else {
+
+    }
+  }
+  // const [rows, setRows] = useState<RouteDetails[]>(data.routes);
+  // const originalList = data.routes;
+  function handleDelete(id: string) {
+    APIManager.sharedInstance()
+      .deleteRoute(id)
+      .then((response) => {
+        setToastMsg(response?.message);
+        setToastColor("success");
+        setShowToast(true);
+      })
+      .catch((err) => {
+        if (err instanceof APIResponseErr) {
+          setToastMsg(err.message);
+          setToastColor("error");
+          setShowToast(true);
+        } else {
+          console.log(err);
+        }
+      });
+  }
+  function handleFilter(inputTxt: string) {
+      setSearch(inputTxt)
+    // setSearch(inputTxt);
+    // if (inputTxt.length > 0) {
+    //   let filterData: RouteDetails[] = originalList.filter((data) =>
+    //     data.title.toLowerCase().includes(inputTxt.toLowerCase())
+    //   );
+    //   setRows(filterData);
+    // } else {
+    //   setRows(originalList);
+    // }
+  }
+  function callModal(id: string) {
+    setDeleteId(id);
+    setShowModal(true);
+  }
+  const handleChangeRowsPerPage = (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    setPageSize(parseInt(event.target.value, 10));
+    setNewPage(1);
+  };
+  const handleChangePage = (event: unknown, newPage: number) => {
+    console.log(newPage + 1);
+    setNewPage(newPage + 1);
+  };
+  const handleClickAway = () => {
+    setShowModal(false);
+  };
+  return (
+    <>
+    {renderResult()}
+    </>
   );
 }

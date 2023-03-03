@@ -18,34 +18,14 @@ export default function Home() {
     }
     setShowToast(false)
     console.log("coming here")
-    setRefresh(true)
   };
   const [page_size, setPageSize] = useState<number>(5)
   const [page_number, setNewPage] = useState<number>(1)
   const contextValue = {page_number, setNewPage, page_size, setPageSize}
   const [toastMessage, setToastMsg] = useState<string>("")
   const [showToast, setShowToast] = useState<boolean>(false)
-  const [ toRefresh, setRefresh] = useState<boolean> (false)
-  const [mocks, setMocks] = useState<RoutesResponse>(defaultResponse)
   const [toastColor, setToastColor] = useState<AlertColor>("success")
   const toastContextVal = {toastMessage, setToastMsg, toastColor, setToastColor, showToast, setShowToast }
-  const {isloggedIn, setlogin} = useContext(AuthContext)
-  useEffect( () => {
-      APIManager.sharedInstance().getAllRoutes(page_number, page_size).then ((res) => {
-        setMocks(res)
-        setRefresh(false)
-      }).catch((err) => {
-        if (err instanceof APIResponseErr) {
-          setShowToast(true)
-          setToastMsg(err.message)
-          setToastColor("error")
-          setRefresh(false)
-          setlogin(false)
-        } else {
-          console.log(err)
-        }
-      })    
-  },[page_number, page_size, toRefresh, isloggedIn])
   const navItems: NavItemsList[] = [{name:"About", navlink:"/about", isExternal: false}]
   return (
     <PageContext.Provider value={contextValue} >

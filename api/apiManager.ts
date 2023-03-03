@@ -3,6 +3,7 @@ import {
   ApiErrSchema,
   APIResponseErr,
   AuthReqSchema,
+  CreateDomainReq,
   DomainDTO,
   LoginReqSchema,
   LoginSuccessResponse,
@@ -12,14 +13,21 @@ import {
   SuccessResponse,
 } from "../DTO/components";
 import Cookies from "js-cookie";
-
 export class APIManager {
   private static instance: APIManager;
   axiosInstance: AxiosInstance;
   private constructor() {
     this.axiosInstance = axios.create({
-      baseURL: "http://localhost:3000/"
+      baseURL: "http://localhost:3000/",
     })
+    this.axiosInstance.interceptors.request.use(request => {
+        console.log('Starting Request', JSON.stringify(request, null, 2))
+        return request
+      })
+      this.axiosInstance.interceptors.response.use(response => {
+        console.log('Response recived', JSON.stringify(response.data, null, 2))
+        return response
+      }) 
   }
   public static sharedInstance(): APIManager {
     if (!APIManager.instance) {
@@ -27,30 +35,26 @@ export class APIManager {
     }
     return APIManager.instance;
   }
-  //http://localhost:3000/mocks
-  queryUrl = process.env.middilewareURL ?? "";
-  authUrl = "";
-  async getAllRoutes(
+  getAllRoutes(
     page_number: number,
-    page_size: number
+    page_size: number,
+    domain: string
   ): Promise<RoutesResponse> {
-    try {
-      const response = await this.axiosInstance.get<RoutesResponse>('mocks', {
-        params: {
-          page: page_number,
-          size: page_size,
-          domain: 'mfs'
-        },
-      });
+   return this.axiosInstance.get<RoutesResponse>('mocks', {
+      params: {
+        page: page_number,
+        size: page_size,
+        domain: domain,
+      },
+    }).then((response) => {
       if (response.status == 200) {
-        return Promise.resolve(response.data as RoutesResponse);
+        return response.data 
       } else {
-        const errObj = this.handleInvalidHttp(response);
-        return Promise.reject(errObj);
+        throw this.handleInvalidHttp(response);
       }
-    } catch (error) {
+    }).catch((error) => {
       throw this.handleCatchedError(error);
-    }
+    })
   }
   async deleteRoute(id: string): Promise<SuccessResponse> {
     try {
@@ -69,6 +73,7 @@ export class APIManager {
   }
   async createRoute(routeObj: RouteDetails): Promise<SuccessResponse> {
     try {
+      console.log(routeObj)
       const response = await this.axiosInstance.post<SuccessResponse>(
         'mocks',
         routeObj
@@ -86,6 +91,7 @@ export class APIManager {
 
   async updateRoute(routeOj: RouteDetails): Promise<SuccessResponse> {
     try {
+      console.log(routeOj)
       const response = await this.axiosInstance.put<SuccessResponse>('mocks', routeOj);
       if (response.status == 200) {
         return Promise.resolve(response.data as SuccessResponse);
@@ -98,19 +104,17 @@ export class APIManager {
     }
   }
 
-  async fetchTheRoute(id: String, token: String): Promise<RouteDetails> {
-    try {
-      const response = await this.axiosInstance.get(`mocks/${id}`, {
-      });
+  async fetchTheRoute(id: String): Promise<RouteDetails> {
+    return this.axiosInstance.get(`mocks/${id}`).then((response) => {
       if (response.status == 200) {
         return Promise.resolve(response.data.route as RouteDetails);
       } else {
         const errObj = this.handleInvalidHttp(response);
         return Promise.reject(errObj);
       }
-    } catch (error) {
+    }).catch((error) => {
       throw this.handleCatchedError(error);
-    }
+    });
   }
 
   async login(loginObj: LoginReqSchema): Promise<LoginSuccessResponse> {
@@ -162,6 +166,12 @@ export class APIManager {
    fetechAllDomains () {
     return this.axiosInstance.get<DomainDTO[]>('domains').then((response) => response.data)
   }
+ setAdomain (domainReq: CreateDomainReq) {
+    return this.axiosInstance.post<SuccessResponse>('domains',domainReq).then((response) => response.data)
+ }
+ deleteDomain(id: string) {
+  return this.axiosInstance.delete<SuccessResponse>('domains',{params:{id:id}}).then((response) => response.data)
+ }
 
   handleCatchedError(error: unknown): SuccessResponse | Error {
     if (axios.isAxiosError(error) && error.response) {
