@@ -80,7 +80,10 @@ export class APIManager {
   async createRoute(routeObj: RouteDetails): Promise<SuccessResponse> {
     return this.axiosInstance
       .post<SuccessResponse>("mocks", routeObj)
-      .then((response) => response.data);
+      .then((response) => response.data)
+      .catch((error) => {
+        throw this.handleCatchedError(error)
+       })
   }
 
   async updateRoute(routeOj: RouteDetails): Promise<SuccessResponse> {
@@ -171,12 +174,18 @@ export class APIManager {
   setAdomain(domainReq: CreateDomainReq) {
     return this.axiosInstance
       .post<SuccessResponse>("domains", domainReq)
-      .then((response) => response.data);
+      .then((response) => response.data)
+      .catch((error) => {
+       throw this.handleCatchedError(error)
+      })
   }
   deleteDomain(id: string) {
     return this.axiosInstance
       .delete<SuccessResponse>("domains", { params: { id: id } })
-      .then((response) => response.data);
+      .then((response) => response.data)
+      .catch((error) => {
+        throw this.handleCatchedError(error)
+       })
   }
 
   handleCatchedError(error: unknown): SuccessResponse | Error {

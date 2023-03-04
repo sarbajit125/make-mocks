@@ -9,6 +9,7 @@ export default function App({ Component, pageProps }: AppProps) {
       queries:{
         staleTime:  tenMinsInMS,
         notifyOnChangeProps: 'tracked',
+        useErrorBoundary:(error) => error.response?.status >= 500,
       }
     }
   }));

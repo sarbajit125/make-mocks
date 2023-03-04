@@ -8,6 +8,7 @@ import { AlertColor, Backdrop, CircularProgress } from "@mui/material";
 import { APIManager } from "../../api/apiManager";
 import { useMutation, useQuery, useQueryClient } from "react-query";
 import EnhancedForm from "../../components/EnhancedForm";
+import ShowToast from "../../components/showToast";
 
 export default function Blog() {
   const router = useRouter();
@@ -46,50 +47,33 @@ export default function Blog() {
   });
   const createMutation = useMutation({
     mutationKey:['createMock', pageId],
-    mutationFn: (mock: RouteDetails) => APIManager.sharedInstance().createRoute(mock)
+    mutationFn: (mock: RouteDetails) => APIManager.sharedInstance().createRoute(mock),
+    onSuccess(data, variables, context) {
+      setOpen(true)
+      setToastmsg(data.message)
+      setToastColor("success")
+      queryClient.invalidateQueries("mocks");
+    },
+  })
+  const updateMutation = useMutation({
+    mutationKey:['updateMock', pageId],
+    mutationFn: (mock: RouteDetails) => APIManager.sharedInstance().updateRoute(mock),
+    onSuccess(data, variables, context) {
+      setOpen(true)
+      setToastmsg(data.message)
+      setToastColor("success")
+      queryClient.invalidateQueries("mocks");
+    },
   })
   const [open, setOpen] = useState(false);
-  const [showOverlay, setOverlay] = useState(true);
   const [toastMsg, setToastmsg] = useState("");
   const [toastColor, setToastColor] = useState<AlertColor>("success");
 
   function submitRoute(isCreate: boolean, mock: RouteDetails) {
     if (isCreate) {
-      APIManager.sharedInstance()
-        .createRoute(mock)
-        .then((response) => {
-          queryClient.invalidateQueries("mocks");
-          router.back();
-          setToastmsg(response.message);
-          setOpen(true);
-        })
-        .catch((err) => {
-          if (err instanceof APIResponseErr) {
-            setToastmsg(err.message);
-            setOpen(true);
-          } else {
-            console.log(err);
-          }
-        });
+      createMutation.mutate(mock)
     } else {
-      APIManager.sharedInstance()
-        .updateRoute(mock)
-        .then((response) => {
-          queryClient.invalidateQueries("mocks");
-          router.back();
-          setToastmsg(response.message);
-          setToastColor("success");
-          setOpen(true);
-        })
-        .catch((err) => {
-          if (err instanceof APIResponseErr) {
-            setToastmsg(err.message);
-            setToastColor("error");
-            setOpen(true);
-          } else {
-            console.log(err);
-          }
-        });
+      updateMutation.mutate(mock)
     }
   }
 
@@ -101,6 +85,7 @@ export default function Blog() {
       return;
     }
     setOpen(false);
+    router.back()
   };
   const prepareResponse = () => {
     if (isLoading) {
@@ -108,7 +93,7 @@ export default function Blog() {
         <Paper>
           <Backdrop
             sx={{ color: "#fff", zIndex: (theme) => theme.zIndex.drawer + 1 }}
-            open={showOverlay}
+            open={true}
           >
             <CircularProgress color="inherit" />
           </Backdrop>
@@ -135,7 +120,18 @@ export default function Blog() {
       );
     }
   };
-  return <div>{prepareResponse()}</div>;
+  return(
+    <div>
+      {prepareResponse()}
+      <ShowToast
+        message={toastMsg}
+        open={open}
+        onClose={handleClose}
+        color={toastColor}
+        onCrossClick={handleClose}
+      />
+    </div>
+  ) 
 }
 // export async function getServerSideProps(context: {
 //   req: any;

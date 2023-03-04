@@ -234,15 +234,6 @@ function EnhancedForm({ post, isCreate, handleSubmit }: PostFormProps) {
           {" "}
           Submit
         </Button>
-        <Button
-          sx={{ width: "20%" }}
-          variant="outlined"
-          color="secondary"
-          type="reset"
-        >
-          {" "}
-          Reset
-        </Button>
       </Box>
     </form>
   );
