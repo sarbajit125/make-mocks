@@ -188,15 +188,6 @@ export function EnhancedPosts() {
   }
   function handleFilter(inputTxt: string) {
       setSearch(inputTxt)
-    // setSearch(inputTxt);
-    // if (inputTxt.length > 0) {
-    //   let filterData: RouteDetails[] = originalList.filter((data) =>
-    //     data.title.toLowerCase().includes(inputTxt.toLowerCase())
-    //   );
-    //   setRows(filterData);
-    // } else {
-    //   setRows(originalList);
-    // }
   }
   function callModal(id: string) {
     setDeleteId(id);

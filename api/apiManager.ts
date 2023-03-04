@@ -19,15 +19,15 @@ export class APIManager {
   private constructor() {
     this.axiosInstance = axios.create({
       baseURL: "http://localhost:3000/",
-    })
-    this.axiosInstance.interceptors.request.use(request => {
-        console.log('Starting Request', JSON.stringify(request, null, 2))
-        return request
-      })
-      this.axiosInstance.interceptors.response.use(response => {
-        console.log('Response recived', JSON.stringify(response.data, null, 2))
-        return response
-      }) 
+    });
+    this.axiosInstance.interceptors.request.use((request) => {
+      console.log("Starting Request", JSON.stringify(request, null, 2));
+      return request;
+    });
+    this.axiosInstance.interceptors.response.use((response) => {
+      console.log("Response recived", JSON.stringify(response.data, null, 2));
+      return response;
+    });
   }
   public static sharedInstance(): APIManager {
     if (!APIManager.instance) {
@@ -40,27 +40,33 @@ export class APIManager {
     page_size: number,
     domain: string
   ): Promise<RoutesResponse> {
-   return this.axiosInstance.get<RoutesResponse>('mocks', {
-      params: {
-        page: page_number,
-        size: page_size,
-        domain: domain,
-      },
-    }).then((response) => {
-      if (response.status == 200) {
-        return response.data 
-      } else {
-        throw this.handleInvalidHttp(response);
-      }
-    }).catch((error) => {
-      throw this.handleCatchedError(error);
-    })
+    return this.axiosInstance
+      .get<RoutesResponse>("mocks", {
+        params: {
+          page: page_number,
+          size: page_size,
+          domain: domain,
+        },
+      })
+      .then((response) => {
+        if (response.status == 200) {
+          return response.data;
+        } else {
+          throw this.handleInvalidHttp(response);
+        }
+      })
+      .catch((error) => {
+        throw this.handleCatchedError(error);
+      });
   }
   async deleteRoute(id: string): Promise<SuccessResponse> {
     try {
-      const response = await this.axiosInstance.delete<SuccessResponse>('mocks', {
-        params: { id: id },
-      });
+      const response = await this.axiosInstance.delete<SuccessResponse>(
+        "mocks",
+        {
+          params: { id: id },
+        }
+      );
       if (response.status == 200) {
         return Promise.resolve(response.data as SuccessResponse);
       } else {
@@ -72,27 +78,18 @@ export class APIManager {
     }
   }
   async createRoute(routeObj: RouteDetails): Promise<SuccessResponse> {
-    try {
-      console.log(routeObj)
-      const response = await this.axiosInstance.post<SuccessResponse>(
-        'mocks',
-        routeObj
-      );
-      if (response.status == 201) {
-        return Promise.resolve(response.data as SuccessResponse);
-      } else {
-        const errObj = this.handleInvalidHttp(response);
-        return Promise.reject(errObj);
-      }
-    } catch (error) {
-      throw this.handleCatchedError(error);
-    }
+    return this.axiosInstance
+      .post<SuccessResponse>("mocks", routeObj)
+      .then((response) => response.data);
   }
 
   async updateRoute(routeOj: RouteDetails): Promise<SuccessResponse> {
     try {
-      console.log(routeOj)
-      const response = await this.axiosInstance.put<SuccessResponse>('mocks', routeOj);
+      console.log(routeOj);
+      const response = await this.axiosInstance.put<SuccessResponse>(
+        "mocks",
+        routeOj
+      );
       if (response.status == 200) {
         return Promise.resolve(response.data as SuccessResponse);
       } else {
@@ -105,16 +102,19 @@ export class APIManager {
   }
 
   async fetchTheRoute(id: String): Promise<RouteDetails> {
-    return this.axiosInstance.get(`mocks/${id}`).then((response) => {
-      if (response.status == 200) {
-        return Promise.resolve(response.data.route as RouteDetails);
-      } else {
-        const errObj = this.handleInvalidHttp(response);
-        return Promise.reject(errObj);
-      }
-    }).catch((error) => {
-      throw this.handleCatchedError(error);
-    });
+    return this.axiosInstance
+      .get(`mocks/${id}`)
+      .then((response) => {
+        if (response.status == 200) {
+          return Promise.resolve(response.data.route as RouteDetails);
+        } else {
+          const errObj = this.handleInvalidHttp(response);
+          return Promise.reject(errObj);
+        }
+      })
+      .catch((error) => {
+        throw this.handleCatchedError(error);
+      });
   }
 
   async login(loginObj: LoginReqSchema): Promise<LoginSuccessResponse> {
@@ -163,15 +163,21 @@ export class APIManager {
       console.log(error);
     }
   }
-   fetechAllDomains () {
-    return this.axiosInstance.get<DomainDTO[]>('domains').then((response) => response.data)
+  async fetechAllDomains() {
+    return this.axiosInstance
+      .get<DomainDTO[]>("domains")
+      .then((response) => response.data);
   }
- setAdomain (domainReq: CreateDomainReq) {
-    return this.axiosInstance.post<SuccessResponse>('domains',domainReq).then((response) => response.data)
- }
- deleteDomain(id: string) {
-  return this.axiosInstance.delete<SuccessResponse>('domains',{params:{id:id}}).then((response) => response.data)
- }
+  setAdomain(domainReq: CreateDomainReq) {
+    return this.axiosInstance
+      .post<SuccessResponse>("domains", domainReq)
+      .then((response) => response.data);
+  }
+  deleteDomain(id: string) {
+    return this.axiosInstance
+      .delete<SuccessResponse>("domains", { params: { id: id } })
+      .then((response) => response.data);
+  }
 
   handleCatchedError(error: unknown): SuccessResponse | Error {
     if (axios.isAxiosError(error) && error.response) {
