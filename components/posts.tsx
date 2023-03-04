@@ -4,7 +4,6 @@ import TableCell from "@mui/material/TableCell";
 import TableContainer from "@mui/material/TableContainer";
 import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
-import { APIResponseErr } from "../DTO/components";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import Paper from "@mui/material/Paper";
@@ -17,35 +16,61 @@ import {
   Box,
   TextField,
   TablePagination,
+  AlertColor,
 } from "@mui/material";
 import Link from "next/link";
-import { useState, useContext } from "react";
+import { useState } from "react";
 import ConfirmModal from "./confirmModal";
 import AddIcon from "@mui/icons-material/Add";
 import { v4 as uuidv4 } from "uuid";
 import { APIManager } from "../api/apiManager";
-import { ToastContext } from "../contexts/pageContext";
 import { getAllRoutes } from "../DTO/queryHooks";
 import { useRouter } from "next/router";
+import { useMutation, useQueryClient } from "react-query";
+import ShowToast from "./showToast";
+import { APIResponseErr } from "../DTO/components";
 
 export function EnhancedPosts() {
   const router = useRouter()
+  const queryClient = useQueryClient();
+  const deleteMutation = useMutation({
+    mutationKey: ['deleteMock'],
+    mutationFn: (id: string) => APIManager.sharedInstance().deleteRoute(id),
+    onSuccess(data, _variables, _context) {
+      queryClient.invalidateQueries('mocks')
+      setToastmsg(data.message)
+      setToastColor("success")
+      setOpen(true)
+    },
+    onError(error, _variables, _context) {
+      if (error instanceof APIResponseErr) {
+        setToastmsg(error.message)
+      } else {
+        setToastmsg("Something went wrong")
+      }
+      setToastColor("error")
+      setOpen(true)
+    },
+  })
+  const handleClose = (
+    _event?: React.SyntheticEvent | Event,
+    reason?: string
+  ) => {
+    if (reason === "clickaway") {
+      return;
+    }
+    setOpen(false);
+  };
   const [showModal, setShowModal] = useState(false);
   const [deleteId, setDeleteId] = useState<string>("");
   const [page_number, setNewPage] = useState<number>(1);
   const [page_size, setPageSize] = useState<number>(5);
   const [searchTxt, setSearch] = useState<string>("");
-  const {
-    toastMessage,
-    setToastMsg,
-    toastColor,
-    setToastColor,
-    showToast,
-    setShowToast,
-  } = useContext(ToastContext);
   const domainId = typeof router.query.id === 'string' ? router.query.id : ""
   const {data, isSuccess} = getAllRoutes(page_number, page_size, domainId, searchTxt)
-
+  const [open, setOpen] = useState(false);
+  const [toastMsg, setToastmsg] = useState("");
+  const [toastColor, setToastColor] = useState<AlertColor>("success");
   const renderResult = () => {
     if (isSuccess) {
       return (
@@ -153,7 +178,7 @@ export function EnhancedPosts() {
         actionBtnTitle={"Delete"}
         actionBtnCallback={(id: string) => {
           setShowModal(false);
-          handleDelete(id);
+          deleteMutation.mutate(id);
         }}
         cancelBtnTitle={"Cancel"}
         cancelBtnAction={() => {
@@ -165,26 +190,6 @@ export function EnhancedPosts() {
     } else {
 
     }
-  }
-  // const [rows, setRows] = useState<RouteDetails[]>(data.routes);
-  // const originalList = data.routes;
-  function handleDelete(id: string) {
-    APIManager.sharedInstance()
-      .deleteRoute(id)
-      .then((response) => {
-        setToastMsg(response?.message);
-        setToastColor("success");
-        setShowToast(true);
-      })
-      .catch((err) => {
-        if (err instanceof APIResponseErr) {
-          setToastMsg(err.message);
-          setToastColor("error");
-          setShowToast(true);
-        } else {
-          console.log(err);
-        }
-      });
   }
   function handleFilter(inputTxt: string) {
       setSearch(inputTxt)
@@ -209,6 +214,13 @@ export function EnhancedPosts() {
   return (
     <>
     {renderResult()}
+    <ShowToast
+        message={toastMsg}
+        open={open}
+        onClose={handleClose}
+        color={toastColor}
+        onCrossClick={handleClose}
+      />
     </>
   );
 }

@@ -1,7 +1,5 @@
 import { Button, Container, Typography } from "@mui/material";
-import Link from "next/link";
 import { useRouter } from "next/router";
-import { APIResponseErr } from "../../DTO/components";
 
 
 export default function CustomErrPage() {

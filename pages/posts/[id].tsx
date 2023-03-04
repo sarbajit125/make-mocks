@@ -9,13 +9,14 @@ import { APIManager } from "../../api/apiManager";
 import { useMutation, useQuery, useQueryClient } from "react-query";
 import EnhancedForm from "../../components/EnhancedForm";
 import ShowToast from "../../components/showToast";
+import CustomErrPage from "./errors";
 
 export default function Blog() {
   const router = useRouter();
   const queryClient = useQueryClient();
   const isCreate: boolean =
     typeof router.query.isCreate === "string"
-      ? router.query.id === "true"
+      ? router.query.isCreate === "true"
         ? true
         : false
       : false;
@@ -48,21 +49,41 @@ export default function Blog() {
   const createMutation = useMutation({
     mutationKey:['createMock', pageId],
     mutationFn: (mock: RouteDetails) => APIManager.sharedInstance().createRoute(mock),
-    onSuccess(data, variables, context) {
+    onSuccess(data, _variables, _context) {
       setOpen(true)
       setToastmsg(data.message)
       setToastColor("success")
       queryClient.invalidateQueries("mocks");
+      
+    },
+    onError(error, _variables, _context) {
+      if (error instanceof APIResponseErr) {
+        setToastmsg(error.message)
+      } else {
+        setToastmsg("Something went wrong")
+      }
+      setToastColor("error")
+      setOpen(true)
     },
   })
   const updateMutation = useMutation({
     mutationKey:['updateMock', pageId],
     mutationFn: (mock: RouteDetails) => APIManager.sharedInstance().updateRoute(mock),
-    onSuccess(data, variables, context) {
+    onSuccess(data, _variables, _context) {
       setOpen(true)
       setToastmsg(data.message)
       setToastColor("success")
       queryClient.invalidateQueries("mocks");
+      queryClient.invalidateQueries("post");
+    },
+    onError(error, _variables, _context) {
+      if (error instanceof APIResponseErr) {
+        setToastmsg(error.message)
+      } else {
+        setToastmsg("Something went wrong")
+      }
+      setToastColor("error")
+      setOpen(true)
     },
   })
   const [open, setOpen] = useState(false);
@@ -78,7 +99,7 @@ export default function Blog() {
   }
 
   const handleClose = (
-    event?: React.SyntheticEvent | Event,
+    _event?: React.SyntheticEvent | Event,
     reason?: string
   ) => {
     if (reason === "clickaway") {
@@ -119,6 +140,11 @@ export default function Blog() {
         </Paper>
       );
     }
+    if (isError) {
+      return (
+        <CustomErrPage />
+      )
+    }
   };
   return(
     <div>
@@ -133,11 +159,3 @@ export default function Blog() {
     </div>
   ) 
 }
-// export async function getServerSideProps(context: {
-//   req: any;
-//   query: { id: string; isCreate: string; groupName: string };
-// }) {
-//   let pageId = context.query.id;
-//   const queryBool: boolean = context.query.isCreate === "true" ? true : false;
-
-// }

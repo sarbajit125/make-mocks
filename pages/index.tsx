@@ -1,22 +1,9 @@
-import { useContext, useEffect, useState } from "react";
+import { useState } from "react";
 import { APIManager } from "../api/apiManager";
 import ResponsiveAppBar, { NavItemsList } from "../components/navbar";
-import { EnhancedPosts } from "../components/posts";
 import ShowToast from "../components/showToast";
-import {
-  AuthContext,
-  PageContext,
-  ToastContext,
-} from "../contexts/pageContext";
-import {
-  APIResponseErr,
-  defaultResponse,
-  RoutesResponse,
-} from "../DTO/components";
 import { AlertColor } from "@mui/material";
-import Router from "next/router";
 import { dehydrate, QueryClient } from "react-query";
-import { getAllDomains } from "../DTO/queryHooks";
 import DomainGrid from "../components/DomainGrid";
 export default function Home() {
   const handleToastClose = (

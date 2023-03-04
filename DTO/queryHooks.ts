@@ -1,6 +1,5 @@
-import { useMutation, useQuery } from "react-query";
+import { useQuery } from "react-query";
 import { APIManager } from "../api/apiManager";
-import { CreateDomainReq } from "./components";
 
 export const getAllDomains = () => {
   // eslint-disable-next-line react-hooks/rules-of-hooks

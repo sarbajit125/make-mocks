@@ -61,18 +61,11 @@ export class APIManager {
   }
   async deleteRoute(id: string): Promise<SuccessResponse> {
     try {
-      const response = await this.axiosInstance.delete<SuccessResponse>(
-        "mocks",
-        {
+      const response = await this.axiosInstance
+        .delete<SuccessResponse>("mocks", {
           params: { id: id },
-        }
-      );
-      if (response.status == 200) {
-        return Promise.resolve(response.data as SuccessResponse);
-      } else {
-        const errObj = this.handleInvalidHttp(response);
-        return Promise.reject(errObj);
-      }
+        });
+      return response.data;
     } catch (error) {
       throw this.handleCatchedError(error);
     }
@@ -82,8 +75,8 @@ export class APIManager {
       .post<SuccessResponse>("mocks", routeObj)
       .then((response) => response.data)
       .catch((error) => {
-        throw this.handleCatchedError(error)
-       })
+        throw this.handleCatchedError(error);
+      });
   }
 
   async updateRoute(routeOj: RouteDetails): Promise<SuccessResponse> {
@@ -171,21 +164,27 @@ export class APIManager {
       .get<DomainDTO[]>("domains")
       .then((response) => response.data);
   }
-  setAdomain(domainReq: CreateDomainReq) {
-    return this.axiosInstance
-      .post<SuccessResponse>("domains", domainReq)
-      .then((response) => response.data)
-      .catch((error) => {
-       throw this.handleCatchedError(error)
-      })
+  async setAdomain(domainReq: CreateDomainReq) {
+    try {
+      const response = await this.axiosInstance.post<SuccessResponse>(
+        "domains",
+        domainReq
+      );
+      return response.data;
+    } catch (error) {
+      throw this.handleCatchedError(error);
+    }
   }
-  deleteDomain(id: string) {
-    return this.axiosInstance
-      .delete<SuccessResponse>("domains", { params: { id: id } })
-      .then((response) => response.data)
-      .catch((error) => {
-        throw this.handleCatchedError(error)
-       })
+  async deleteDomain(id: string) {
+    try {
+      const response = await this.axiosInstance.delete<SuccessResponse>(
+        "domains",
+        { params: { id: id } }
+      );
+      return response.data;
+    } catch (error) {
+      throw this.handleCatchedError(error);
+    }
   }
 
   handleCatchedError(error: unknown): SuccessResponse | Error {
