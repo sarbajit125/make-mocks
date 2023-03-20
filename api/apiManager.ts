@@ -18,7 +18,7 @@ export class APIManager {
   axiosInstance: AxiosInstance;
   private constructor() {
     this.axiosInstance = axios.create({
-      baseURL: "http://localhost:3000/",
+      baseURL: process.env.middilewareURL || "http://localhost:3000/",
     });
     this.axiosInstance.interceptors.response.use((response) => {
       console.log("Response recived", JSON.stringify(response.data, null, 2));

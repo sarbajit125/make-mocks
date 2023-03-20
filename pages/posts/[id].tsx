@@ -37,7 +37,7 @@ export default function Blog() {
     isError,
     isLoading,
   } = useQuery({
-    queryKey: ["post", pageId],
+    queryKey: ["post", pageId, isCreate],
     queryFn: () => {
       if (isCreate) {
         return defaultData;
@@ -53,7 +53,7 @@ export default function Blog() {
       setOpen(true)
       setToastmsg(data.message)
       setToastColor("success")
-      queryClient.invalidateQueries("mocks");
+      queryClient.invalidateQueries({ queryKey: ['post', 'mocks']});
       
     },
     onError(error, _variables, _context) {
