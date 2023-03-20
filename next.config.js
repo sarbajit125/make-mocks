@@ -3,7 +3,7 @@ const nextConfig = {
   reactStrictMode: true,
   env: {
     middilewareURL:"http://localhost:3000/mocks",
-    clientName: "ADG"
+   output: 'standalone',
   }
 }
 

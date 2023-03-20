@@ -20,10 +20,6 @@ export class APIManager {
     this.axiosInstance = axios.create({
       baseURL: "http://localhost:3000/",
     });
-    this.axiosInstance.interceptors.request.use((request) => {
-      console.log("Starting Request", JSON.stringify(request, null, 2));
-      return request;
-    });
     this.axiosInstance.interceptors.response.use((response) => {
       console.log("Response recived", JSON.stringify(response.data, null, 2));
       return response;
