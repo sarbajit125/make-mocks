@@ -163,7 +163,7 @@ export class APIManager {
   async setAdomain(domainReq: CreateDomainReq) {
     try {
       const response = await this.axiosInstance.post<SuccessResponse>(
-        "domains",
+        "api/addADomain",
         domainReq
       );
       return response.data;
@@ -174,7 +174,7 @@ export class APIManager {
   async deleteDomain(id: string) {
     try {
       const response = await this.axiosInstance.delete<SuccessResponse>(
-        "domains",
+        "api/deleteADomain",
         { params: { id: id } }
       );
       return response.data;

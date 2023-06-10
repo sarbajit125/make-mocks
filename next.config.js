@@ -2,7 +2,7 @@
 const nextConfig = {
   reactStrictMode: true,
   env: {
-    middilewareURL:"http://localhost:5000/",
+    middilewareURL:"http://localhost:8080/",
    output: 'standalone',
   }
 }

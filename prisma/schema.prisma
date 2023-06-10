@@ -1,0 +1,49 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+  previewFeatures = ["jsonProtocol"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url = env("POSTGRES_PRISMA_URL")
+}
+model Post {
+  id        String     @default(cuid()) @id
+  title     String
+  endpoint   String
+  response   String
+  type HttpType
+  statusCode Int
+  domain    Domains?   @relation(fields: [domainName], references: [name])
+  domainName String
+  headers  CustomHeaders[]
+}
+
+model Domains {
+  id            String       @default(cuid()) @id
+  name          String    @unique
+  desc         String? 
+  createdAt     DateTime  @default(now()) @map(name: "created_at")
+  posts         Post[]
+  @@map(name: "domains")
+}
+
+model CustomHeaders {
+  id String @default(cuid()) @id
+  key String
+  value String
+  mockRef Post @relation(fields: [mockId], references: [id])
+  mockId String
+}
+
+enum HttpType {
+   POST
+   GET 
+   PUT 
+   PATCH 
+   DELETE
+
+}
