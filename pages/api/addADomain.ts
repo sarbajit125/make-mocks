@@ -17,10 +17,10 @@ export default async function handler(
         return res.status(200).json({
           message: 'Domain subscription successfull',
           serviceCode: 200,
-          timeStamp: new Date().getDate().toString()
+          timeStamp: new Date().toString()
         })
       } else {
-        let errorObj  = new APIResponseErr(400, ResponseStatus.Failure,undefined, "Fetching Failed")
+        let errorObj  = new APIResponseErr(400, ResponseStatus.Failure,new Date().toString(), "Fetching Failed")
         throw errorObj
       }
     } catch (error) {
@@ -33,7 +33,7 @@ export default async function handler(
             new APIResponseErr(
               500,
               ResponseStatus.Failure,
-              undefined,
+              new Date().toString(),
               "Something went wrong"
             )
           );

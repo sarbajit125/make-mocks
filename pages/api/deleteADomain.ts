@@ -17,13 +17,13 @@ export default async function handler(
       return res.status(200).json({
         message: "Domain deleted successfully",
         serviceCode: 200,
-        timeStamp: new Date().getDate().toString(),
+        timeStamp: new Date().toString(),
       });
     } else {
       throw new APIResponseErr(
         400,
         ResponseStatus.Failure,
-        undefined,
+        new Date().toString(),
         "ID missing"
       );
     }
@@ -37,7 +37,7 @@ export default async function handler(
           new APIResponseErr(
             500,
             ResponseStatus.Failure,
-            undefined,
+            new Date().toString(),
             "Something went wrong"
           )
         );

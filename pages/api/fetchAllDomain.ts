@@ -24,7 +24,7 @@ export default async function handler(
           new APIResponseErr(
             500,
             ResponseStatus.Failure,
-            undefined,
+            new Date().toString(),
             "Something went wrong"
           )
         );

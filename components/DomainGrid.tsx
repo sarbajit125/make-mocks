@@ -141,7 +141,7 @@ function DomainGrid({ list }: DomainGridProps) {
                   passHref
                   href={{
                     pathname: "/mocks",
-                    query: { id: item.id },
+                    query: { id: item.name },
                   }}
                 >
                   <Button size="small" onClick={() => console.log("hello")}>

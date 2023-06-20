@@ -5,6 +5,7 @@ import {
   AuthReqSchema,
   CreateDomainReq,
   DomainDTO,
+  HeadersResponse,
   LoginReqSchema,
   LoginSuccessResponse,
   ResponseStatus,
@@ -37,7 +38,7 @@ export class APIManager {
     domain: string
   ): Promise<RoutesResponse> {
     return this.axiosInstance
-      .get<RoutesResponse>("mocks", {
+      .get<RoutesResponse>("api/fetchAllRoutes", {
         params: {
           page: page_number,
           size: page_size,
@@ -58,7 +59,7 @@ export class APIManager {
   async deleteRoute(id: string): Promise<SuccessResponse> {
     try {
       const response = await this.axiosInstance
-        .delete<SuccessResponse>("mocks", {
+        .delete<SuccessResponse>("api/deleteARoute", {
           params: { id: id },
         });
       return response.data;
@@ -68,7 +69,7 @@ export class APIManager {
   }
   async createRoute(routeObj: RouteDetails): Promise<SuccessResponse> {
     return this.axiosInstance
-      .post<SuccessResponse>("mocks", routeObj)
+      .post<SuccessResponse>("api/addARoute", routeObj)
       .then((response) => response.data)
       .catch((error) => {
         throw this.handleCatchedError(error);
@@ -79,7 +80,7 @@ export class APIManager {
     try {
       console.log(routeOj);
       const response = await this.axiosInstance.put<SuccessResponse>(
-        "mocks",
+        "api/updateARoute",
         routeOj
       );
       if (response.status == 200) {
@@ -107,6 +108,18 @@ export class APIManager {
       .catch((error) => {
         throw this.handleCatchedError(error);
       });
+  }
+  async fetchRouteheaders(id: string) : Promise<HeadersResponse> {
+    try {
+      const result = await this.axiosInstance.get<HeadersResponse>('api/fetchAllHeaders', {
+        params:{
+          id: id
+        }
+      })
+      return result.data
+    } catch (error) {
+      throw this.handleCatchedError(error);
+    }
   }
 
   async login(loginObj: LoginReqSchema): Promise<LoginSuccessResponse> {

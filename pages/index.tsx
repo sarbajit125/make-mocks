@@ -1,9 +1,4 @@
-import { useState } from "react";
-import { APIManager } from "../api/apiManager";
 import ResponsiveAppBar, { NavItemsList } from "../components/navbar";
-import ShowToast from "../components/showToast";
-import { AlertColor } from "@mui/material";
-import { dehydrate, QueryClient } from "react-query";
 import DomainGrid from "../components/DomainGrid";
 import prisma from "../lib/prisma";
 import { GetServerSideProps, InferGetServerSidePropsType } from "next";

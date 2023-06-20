@@ -1,53 +1,36 @@
 import Paper from "@mui/material/Paper";
 import { APIResponseErr, RouteDetails } from "../../DTO/components";
 import ResponsiveAppBar, { NavItemsList } from "../../components/navbar";
-import { useState } from "react";
-
+import { useContext, useEffect, useState } from "react";
 import { useRouter } from "next/router";
 import { AlertColor, Backdrop, CircularProgress } from "@mui/material";
 import { APIManager } from "../../api/apiManager";
 import { useMutation, useQuery, useQueryClient } from "react-query";
 import EnhancedForm from "../../components/EnhancedForm";
 import ShowToast from "../../components/showToast";
-import CustomErrPage from "./errors";
+import { RoutePageContext } from "../../contexts/pageContext";
 
 export default function Blog() {
   const router = useRouter();
   const queryClient = useQueryClient();
-  const isCreate: boolean =
-    typeof router.query.isCreate === "string"
-      ? router.query.isCreate === "true"
-        ? true
-        : false
-      : false;
-  const pageId = typeof router.query.id === "string" ? router.query.id : "";
-  const defaultData: RouteDetails = {
-    id: pageId,
-    title: "",
-    endpoint: "/",
-    type: "POST",
-    response: "// some response here",
-    statusCode: 200,
-    domain:
-      typeof router.query.groupName === "string" ? router.query.groupName : "",
-  };
-  const {
-    data: post,
-    isSuccess,
-    isError,
-    isLoading,
-  } = useQuery({
-    queryKey: ["post", pageId, isCreate],
-    queryFn: () => {
-      if (isCreate) {
-        return defaultData;
-      } else {
-        return APIManager.sharedInstance().fetchTheRoute(pageId);
-      }
+  const {mockDetails, isCreate} = useContext(RoutePageContext)
+  // const {data: details, isLoading, isSuccess} = useQuery({
+  //   queryKey: ['headerList', mockDetails.id],
+  //   queryFn: () => APIManager.sharedInstance().fetchRouteheaders(mockDetails.id),
+  //   select(data) {
+  //     const detailData: RouteDetails = {...mockDetails, headers: data.rows}
+  //     return detailData
+  //   },
+  // })
+  const navLinks: NavItemsList[] = [
+    {
+      name: "Dashboard",
+      navlink: `/mocks?id=${mockDetails.domain}`,
+      isExternal: false,
     },
-  });
+  ];
   const createMutation = useMutation({
-    mutationKey:['createMock', pageId],
+    mutationKey:['createMock', mockDetails.id],
     mutationFn: (mock: RouteDetails) => APIManager.sharedInstance().createRoute(mock),
     onSuccess(data, _variables, _context) {
       setOpen(true)
@@ -67,7 +50,7 @@ export default function Blog() {
     },
   })
   const updateMutation = useMutation({
-    mutationKey:['updateMock', pageId],
+    mutationKey:['updateMock', mockDetails.id],
     mutationFn: (mock: RouteDetails) => APIManager.sharedInstance().updateRoute(mock),
     onSuccess(data, _variables, _context) {
       setOpen(true)
@@ -108,54 +91,27 @@ export default function Blog() {
     setOpen(false);
     router.back()
   };
-  const prepareResponse = () => {
-    if (isLoading) {
-      return (
-        <Paper>
-          <Backdrop
+  return(
+    <Paper>
+      <ResponsiveAppBar items={navLinks} />
+      <EnhancedForm
+            post={mockDetails}
+            isCreate={isCreate}
+            handleSubmit={submitRoute}
+          /> 
+       {createMutation.isLoading || updateMutation.isLoading  ? <Backdrop
             sx={{ color: "#fff", zIndex: (theme) => theme.zIndex.drawer + 1 }}
             open={true}
           >
             <CircularProgress color="inherit" />
-          </Backdrop>
-        </Paper>
-      );
-    }
-    if (isSuccess) {
-      const navLinks: NavItemsList[] = [
-        {
-          name: "Dashboard",
-          navlink: `/mocks?id=${post.domain}`,
-          isExternal: false,
-        },
-      ];
-      return (
-        <Paper>
-          <ResponsiveAppBar items={navLinks} />
-          <EnhancedForm
-            post={post}
-            isCreate={isCreate}
-            handleSubmit={submitRoute}
-          />
-        </Paper>
-      );
-    }
-    if (isError) {
-      return (
-        <CustomErrPage />
-      )
-    }
-  };
-  return(
-    <div>
-      {prepareResponse()}
-      <ShowToast
+          </Backdrop> : null}
+       <ShowToast
         message={toastMsg}
         open={open}
         onClose={handleClose}
         color={toastColor}
         onCrossClick={handleClose}
       />
-    </div>
+    </Paper>
   ) 
 }

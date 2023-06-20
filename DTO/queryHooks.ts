@@ -9,7 +9,7 @@ export const getAllDomains = () => {
   });
 };
 
-export const getAllRoutes = (
+export const GetAllRoutes = (
   page_number: number,
   page_size: number,
   domain: string,

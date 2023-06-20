@@ -19,6 +19,12 @@ export interface CustomHeaders {
   value: string;
 }
 
+export interface HeadersResponse {
+  serviceCode: number,
+  timeStamp: string;
+  rows: HeaderTableModel[]
+}
+
 export interface ResponseStruct extends SuccessResponse {
   status: ResponseStatus;
 }
