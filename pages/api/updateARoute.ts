@@ -5,7 +5,7 @@ import {
   ResponseStatus,
 } from "../../DTO/components";
 import prisma from "../../lib/prisma";
-import { HttpType, Prisma } from "@prisma/client";
+import { CustomHeaders, HttpType, Prisma } from "@prisma/client";
 
 export default async function handler(
   req: addRouteRequest,
@@ -24,22 +24,33 @@ export default async function handler(
           title: req.body.title,
           statusCode: req.body.statusCode,
           type: httpType,
-          headers:{
-            connectOrCreate: req.body.headers?.map((item) => {
-              return {
-                where:{
-                  id: item.id
-                },
-                create:{
-                  key: item.key,
-                  id: item.id,
-                  value: item.value,
-                }
-              }
-            })
-          }
+          mockURL: "/" + req.body.domain + req.body.endpoint
         },
       });
+      if (req.body.headers != undefined) {
+        const presentHeaders = await prisma.customHeaders.findMany({
+          where:{
+            mockId: req.body.id
+          }
+        })
+        if (presentHeaders.length != req.body.headers.length) {
+          const deleteAllheaders = await prisma.customHeaders.deleteMany({
+            where:{
+              mockId: req.body.id
+            }
+          })
+            const preparedHeaders: CustomHeaders[] = req.body.headers.map((item) => ({
+              id: item.id,
+              key: item.key,
+              mockId: req.body.id,
+              value: item.value
+            }))
+            const finalResult = await prisma.customHeaders.createMany({
+              data:preparedHeaders,
+              skipDuplicates: true
+            })
+        }
+      }
       return res.status(200).json({
         message: "Route updated successfully",
         serviceCode: 200,

@@ -3,7 +3,7 @@
 
 generator client {
   provider = "prisma-client-js"
-  previewFeatures = ["jsonProtocol"]
+  previewFeatures = ["jsonProtocol", "fullTextSearch"]
 }
 
 datasource db {
@@ -17,9 +17,10 @@ model Post {
   response   String
   type HttpType
   statusCode Int
-  domain    Domains?   @relation(fields: [domainName], references: [name])
+  domain    Domains?   @relation(fields: [domainName], references: [name], onDelete: Cascade)
   domainName String
   headers  CustomHeaders[]
+  mockURL String
 }
 
 model Domains {
@@ -35,7 +36,7 @@ model CustomHeaders {
   id String @default(cuid()) @id
   key String
   value String
-  mockRef Post @relation(fields: [mockId], references: [id])
+  mockRef Post @relation(fields: [mockId], references: [id], onDelete: Cascade)
   mockId String
 }
 

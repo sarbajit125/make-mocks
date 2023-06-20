@@ -16,6 +16,7 @@ export default async function handler(
                     where: {
                       id: id,
                     },
+                  
                   });
                   console.log(response)
                   return res.status(200).json({
@@ -40,6 +41,7 @@ export default async function handler(
               );
         }
     } catch (error) {
+      console.log(error)
         if (error instanceof APIResponseErr) {
             res.status(error.serviceCode).send(error);
           } else {

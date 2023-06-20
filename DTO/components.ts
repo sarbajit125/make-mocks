@@ -94,7 +94,7 @@ export const ExternalNavItems: NavItemsList[] = [
     navlink: "https://codebeautify.org/jsonviewer",
     isExternal: true,
   },
-  { name: "ValidateJSON", navlink: "https://jsonlint.com/", isExternal: true },
+  { name: "JSONDiff", navlink: "https://www.jsondiff.com/", isExternal: true },
   {
     name: "JSONGenerator",
     navlink: "https://json-generator.com/",

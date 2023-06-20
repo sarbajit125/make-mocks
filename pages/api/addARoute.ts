@@ -2,7 +2,7 @@ import { NextApiRequest, NextApiResponse } from "next";
 import { APIResponseErr, ResponseStatus } from "../../DTO/components";
 import { addRouteRequest } from "./updateARoute";
 import prisma from "../../lib/prisma";
-import { HttpType } from "@prisma/client";
+import { CustomHeaders, HttpType } from "@prisma/client";
 
 
 export default async function handler(req:addRouteRequest, res: NextApiResponse) {
@@ -21,9 +21,22 @@ export default async function handler(req:addRouteRequest, res: NextApiResponse)
                         connect:{
                             name: req.body.domain
                         }
-                    }
+                    },
+                    mockURL: "/" + req.body.domain + req.body.endpoint
                 }
             })
+            if (req.body.headers != undefined) {
+                const preparedHeaders: CustomHeaders[] = req.body.headers.map((item) => ({
+                    id: item.id,
+                    key: item.key,
+                    mockId: req.body.id,
+                    value: item.value
+                  }))
+                  const finalResult = await prisma.customHeaders.createMany({
+                    data:preparedHeaders,
+                    skipDuplicates: true
+                  })
+            }
             return res.status(200).json({
                 message: "Route created successfully",
                 serviceCode: 200,

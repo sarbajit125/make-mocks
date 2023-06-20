@@ -159,7 +159,7 @@ export function EnhancedPosts() {
                            toggleIsCreate(false)
                            setMockCuid(row.id)
                            setMockPage(row)
-                           router.push('/posts/${row.id}')
+                           router.push(`/posts/${row.id}`)
                         }}>
                           <EditIcon />
                         </IconButton>
