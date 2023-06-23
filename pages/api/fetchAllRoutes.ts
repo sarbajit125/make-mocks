@@ -29,7 +29,11 @@ export default async function handler(
             take: parseInt(page_size),
             skip: (parseInt(page_number) - 1) * parseInt(page_size)
         })
-        const tableCount = await prisma.post.count()
+        const tableCount = await prisma.post.count({
+          where: {
+            domainName: domain
+          }
+        })
         const routeResp = result.map( (item) => (
           {
             domain: item.domainName,
