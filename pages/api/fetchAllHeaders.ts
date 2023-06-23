@@ -2,6 +2,7 @@ import { Prisma } from "@prisma/client";
 import { NextApiRequest, NextApiResponse } from "next";
 import { APIResponseErr, HeadersResponse, ResponseStatus } from "../../DTO/components";
 import prisma from "../../lib/prisma";
+import { handleAPIError } from "./uploadRoutes";
 
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse)  {
@@ -24,34 +25,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             throw new APIResponseErr(400, ResponseStatus.Failure, new Date().toString(), "id missing from query")
         }
     } catch (error) {
-        console.log(error);
-    if (error instanceof APIResponseErr) {
-      res.status(error.serviceCode).send(error);
-    } else if (
-      error instanceof Prisma.PrismaClientKnownRequestError ||
-      error instanceof Prisma.PrismaClientValidationError
-    ) {
-      res
-        .status(400)
-        .send(
-          new APIResponseErr(
-            400,
-            ResponseStatus.Failure,
-            new Date().toString(),
-            error.message
-          )
-        );
-    } else {
-      res
-        .status(500)
-        .send(
-          new APIResponseErr(
-            500,
-            ResponseStatus.Failure,
-            new Date().toString(),
-            "Something went wrong"
-          )
-        );
-    }
+      const errResp = handleAPIError(error)
+    res.status(errResp.status).json(errResp)
   }
 }

@@ -1,10 +1,11 @@
-import { APIResponseErr, ResponseStatus, RouteDetails } from "../../DTO/components";
+import { APIErrUi, APIResponseErr, ResponseStatus, RouteDetails } from "../../DTO/components";
 import type { NextApiRequest, NextApiResponse } from "next";
 import { File } from "formidable";
 import { asyncParse } from "./uploadDomains";
 import { readFile } from "fs/promises";
 import prisma from "../../lib/prisma";
 import { HttpType } from "@prisma/client";
+import { PrismaClientKnownRequestError, PrismaClientValidationError } from "@prisma/client/runtime";
 export const config = {
   api: {
     bodyParser: false,
@@ -69,24 +70,39 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       );
     }
   } catch (error) {
-    console.log(error);
-    if (error instanceof APIResponseErr) {
-      res.status(error.serviceCode).json({
-        timeStamp: error.timeStamp,
-        message: error.message,
-      });
-    } else {
-      const gernicErr = new APIResponseErr(
-        500,
-        ResponseStatus.Failure,
-        new Date().toString(),
-        "Something went wrong"
-      );
-      res.status(gernicErr.serviceCode).json({
-        timeStamp: gernicErr.timeStamp,
-        message: gernicErr.message,
-      });
-    }
+    const errResp = handleAPIError(error)
+    res.status(errResp.status).json(errResp)
   }
 };
 export default handler
+
+
+export const handleAPIError = (error: unknown): APIErrUi => {
+  console.log(error);
+  if (error instanceof APIResponseErr) {
+    return {
+      message: error.message,
+      status: error.status,
+      timeStamp: error.timeStamp,
+    };
+  } else if (error instanceof PrismaClientKnownRequestError) {
+    return {
+      message: error.message,
+      status: 400,
+      timeStamp: new Date().toString(),
+    };
+  } else if (error instanceof PrismaClientValidationError) {
+    return {
+      message: error.message,
+      status: 400,
+      timeStamp: new Date().toString(),
+    };
+  }
+   else {
+    return {
+      message: "Something went wrong",
+      status: 500,
+      timeStamp: new Date().toString(),
+    };
+  }
+};

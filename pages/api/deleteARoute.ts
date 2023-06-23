@@ -1,6 +1,7 @@
 import { NextApiRequest, NextApiResponse } from "next";
 import { APIResponseErr, ResponseStatus } from "../../DTO/components";
 import prisma from "../../lib/prisma";
+import { handleAPIError } from "./uploadRoutes";
 
 
 
@@ -41,20 +42,7 @@ export default async function handler(
               );
         }
     } catch (error) {
-      console.log(error)
-        if (error instanceof APIResponseErr) {
-            res.status(error.serviceCode).send(error);
-          } else {
-            res
-              .status(500)
-              .send(
-                new APIResponseErr(
-                  500,
-                  ResponseStatus.Failure,
-                  new Date().toString(),
-                  "Something went wrong"
-                )
-              );
-          }
+      const errResp = handleAPIError(error)
+    res.status(errResp.status).json(errResp)
     }
   }

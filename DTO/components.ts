@@ -1,3 +1,4 @@
+
 import { NavItemsList } from "../components/navbar";
 export interface RouteDetails {
   id: string;
@@ -20,9 +21,9 @@ export interface CustomHeaders {
 }
 
 export interface HeadersResponse {
-  serviceCode: number,
+  serviceCode: number;
   timeStamp: string;
-  rows: HeaderTableModel[]
+  rows: HeaderTableModel[];
 }
 
 export interface ResponseStruct extends SuccessResponse {
@@ -135,10 +136,16 @@ export const HTTPStatusList: HTTPStatus[] = [
 ];
 
 export interface HeaderTableModel extends CustomHeaders {
-  id: string,
+  id: string;
 }
 export interface CreateDomainReq {
-  id: string,
-  name: string,
-  desc?: string
+  id: string;
+  name: string;
+  desc?: string;
+}
+
+export interface APIErrUi {
+  message: string;
+  timeStamp?: string;
+  status: number;
 }

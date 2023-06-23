@@ -1,6 +1,7 @@
 import { NextApiRequest, NextApiResponse } from "next";
-import { APIResponseErr, ResponseStatus, SuccessResponse } from "../../DTO/components";
+import { APIResponseErr, ResponseStatus } from "../../DTO/components";
 import prisma from "../../lib/prisma";
+import { handleAPIError } from "./uploadRoutes";
 
 export default async function handler(
     req: addDomainRequest,
@@ -24,20 +25,8 @@ export default async function handler(
         throw errorObj
       }
     } catch (error) {
-      if (error instanceof APIResponseErr) {
-        res.send(error);
-      } else {
-        res
-          .status(500)
-          .send(
-            new APIResponseErr(
-              500,
-              ResponseStatus.Failure,
-              new Date().toString(),
-              "Something went wrong"
-            )
-          );
-      }
+      const errResp = handleAPIError(error)
+      res.status(errResp.status).json(errResp)
     }
   }
 

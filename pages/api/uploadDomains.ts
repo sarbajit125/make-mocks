@@ -4,6 +4,7 @@ import { readFile } from "fs/promises";
 import prisma from "../../lib/prisma";
 import { Domains } from "@prisma/client";
 import { APIResponseErr, ResponseStatus } from "../../DTO/components";
+import { handleAPIError } from "./uploadRoutes";
 export const config = {
   api: {
     bodyParser: false,
@@ -41,24 +42,8 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       );
     }
   } catch (error) {
-    console.log(error);
-    if (error instanceof APIResponseErr) {
-      res.status(error.serviceCode).json({
-        timeStamp: error.timeStamp,
-        message: error.message,
-      });
-    } else {
-      const gernicErr = new APIResponseErr(
-        500,
-        ResponseStatus.Failure,
-        new Date().toString(),
-        "Something went wrong"
-      );
-      res.status(gernicErr.serviceCode).json({
-        timeStamp: gernicErr.timeStamp,
-        message: gernicErr.message,
-      });
-    }
+    const errResp = handleAPIError(error)
+    res.status(errResp.status).json(errResp)
   }
 };
 export const asyncParse = (req: any): Promise<ParseType> =>

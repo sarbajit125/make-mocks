@@ -3,6 +3,7 @@ import { APIResponseErr, ResponseStatus } from "../../DTO/components";
 import { addRouteRequest } from "./updateARoute";
 import prisma from "../../lib/prisma";
 import { CustomHeaders, HttpType } from "@prisma/client";
+import { handleAPIError } from "./uploadRoutes";
 
 
 export default async function handler(req:addRouteRequest, res: NextApiResponse) {
@@ -46,20 +47,7 @@ export default async function handler(req:addRouteRequest, res: NextApiResponse)
             throw new APIResponseErr(405, ResponseStatus.Failure, new Date().toString(), 'Method not allowed')
         }
     } catch (error) {
-        console.log(error)
-        if (error instanceof APIResponseErr) {
-            res.status(error.serviceCode).send(error);
-          } else {
-            res
-              .status(500)
-              .send(
-                new APIResponseErr(
-                  500,
-                  ResponseStatus.Failure,
-                  new Date().toString(),
-                  "Something went wrong"
-                )
-              );
-          }
+        const errResp = handleAPIError(error)
+    res.status(errResp.status).json(errResp)
     }
 }
