@@ -3,6 +3,7 @@ import { dehydrate, QueryClient } from "react-query";
 import { APIManager } from "../../api/apiManager";
 import ResponsiveAppBar, { NavItemsList } from "../../components/navbar";
 import { EnhancedPosts } from "../../components/posts";
+import Head from "next/head";
 
 function Mocks() {
   const navItems: NavItemsList[] = [
@@ -10,6 +11,9 @@ function Mocks() {
   ];
   return (
     <>
+      <Head>
+        <title>Make Mocks</title>
+      </Head>
       <ResponsiveAppBar items={navItems} />
       <EnhancedPosts />
     </>
@@ -19,13 +23,13 @@ export async function getServerSideProps(context: { query: { id: string } }) {
   let domainId = context.query.id;
   const queryClient = new QueryClient();
   await queryClient.prefetchQuery({
-    queryKey: ["mocks",1, 5, domainId],
+    queryKey: ["mocks", 1, 5, domainId],
     queryFn: () => APIManager.sharedInstance().getAllRoutes(1, 5, domainId),
   });
   return {
     props: {
-      dehydratedState: dehydrate(queryClient)
-    }
+      dehydratedState: dehydrate(queryClient),
+    },
   };
 }
 export default Mocks;

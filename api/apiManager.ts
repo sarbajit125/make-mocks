@@ -184,6 +184,29 @@ export class APIManager {
       throw this.handleCatchedError(error);
     }
   }
+  async backupDomains() {
+    try {
+      const response = await this.axiosInstance.get("api/download/domains", {
+        responseType:'blob',
+      })
+      return response.data
+    } catch (error) {
+      throw this.handleCatchedError(error);
+    }
+  }
+  async backupRoutes(domain: string) {
+    try {
+      const response = await this.axiosInstance.get("api/download/routes", {
+        responseType:'blob',
+        params:{
+          domain: domain
+        }
+      })
+      return response.data
+    } catch (error) {
+      throw this.handleCatchedError(error);
+    }
+  }
   async deleteDomain(id: string) {
     try {
       const response = await this.axiosInstance.delete<SuccessResponse>(
@@ -195,7 +218,6 @@ export class APIManager {
       throw this.handleCatchedError(error);
     }
   }
-
   handleCatchedError(error: unknown): SuccessResponse | Error {
     if (axios.isAxiosError(error) && error.response) {
       const errData = error.response.data as ApiErrSchema;

@@ -19,7 +19,9 @@ import {
   AlertColor,
   Backdrop,
   CircularProgress,
+  Fab,
 } from "@mui/material";
+import FileDownloadIcon from "@mui/icons-material/FileDownload";
 import Link from "next/link";
 import { useContext, useState } from "react";
 import ConfirmModal from "./confirmModal";
@@ -28,14 +30,13 @@ import { v4 as uuidv4 } from "uuid";
 import { APIManager } from "../api/apiManager";
 import { GetAllRoutes } from "../DTO/queryHooks";
 import { useRouter } from "next/router";
-import { useMutation, useQueryClient } from "react-query";
+import { useMutation, useQuery, useQueryClient } from "react-query";
 import ShowToast from "./showToast";
 import { APIResponseErr, RoutesResponse } from "../DTO/components";
 import { RoutePageContext } from "../contexts/pageContext";
 
 export function EnhancedPosts() {
   const router = useRouter();
-  
   const queryClient = useQueryClient();
   const deleteMutation = useMutation({
     mutationKey: ["deleteMock"],
@@ -47,10 +48,11 @@ export function EnhancedPosts() {
       setOpen(true);
     },
     onError(error, _variables, _context) {
-      handleError(error)
+      handleError(error);
     },
   });
-  const {setMockCuid, setMockPage, toggleIsCreate} = useContext(RoutePageContext)
+  const { setMockCuid, setMockPage, toggleIsCreate } =
+    useContext(RoutePageContext);
   const handleClose = (
     _event?: React.SyntheticEvent | Event,
     reason?: string
@@ -72,6 +74,26 @@ export function EnhancedPosts() {
     domainId,
     searchTxt
   );
+  const backUPData = useQuery({
+      queryKey: ["downloadRoutes", data?.domain],
+      enabled: false,
+      queryFn: () => APIManager.sharedInstance().backupRoutes(data?.domain ?? ""),
+      onSuccess: (data) => {
+        // this works and prompts for download
+        var link = document.createElement("a"); // once we have the file buffer BLOB from the post request we simply need to send a GET request to retrieve the file data
+        link.href = window.URL.createObjectURL(data);
+        link.download = "Routes.json";
+        link.click();
+        link.remove(); //afterwards we remove the element
+      },
+      onError: (err) => {
+        setToastmsg(
+          err instanceof APIResponseErr ? err.message : "Something went wrong"
+        );
+        setToastColor("error");
+        setOpen(true);
+      },
+    });
   const [open, setOpen] = useState(false);
   const [toastMsg, setToastmsg] = useState("");
   const [toastColor, setToastColor] = useState<AlertColor>("success");
@@ -116,17 +138,17 @@ export function EnhancedPosts() {
                   startIcon={<AddIcon />}
                   sx={{ whiteSpace: "nowrap" }}
                   onClick={() => {
-                    toggleIsCreate(true)
-                    setMockCuid(uuidv4())
+                    toggleIsCreate(true);
+                    setMockCuid(uuidv4());
                     setMockPage({
                       domain: data.domain,
                       endpoint: "/",
                       id: uuidv4(),
                       response: "// some response here",
                       statusCode: 200,
-                      title: '',
-                      type: 'POST',
-                    })
+                      title: "",
+                      type: "POST",
+                    });
                   }}
                 >
                   Add Route
@@ -155,14 +177,16 @@ export function EnhancedPosts() {
                   <TableCell>{row.statusCode}</TableCell>
                   <TableCell>
                     <Tooltip title="Edit the mock">
-                        <IconButton onClick={() => {
-                           toggleIsCreate(false)
-                           setMockCuid(row.id)
-                           setMockPage(row)
-                           router.push(`/posts/${row.id}`)
-                        }}>
-                          <EditIcon />
-                        </IconButton>
+                      <IconButton
+                        onClick={() => {
+                          toggleIsCreate(false);
+                          setMockCuid(row.id);
+                          setMockPage(row);
+                          router.push(`/posts/${row.id}`);
+                        }}
+                      >
+                        <EditIcon />
+                      </IconButton>
                     </Tooltip>
                     <Tooltip title="Delete the Mock">
                       <IconButton onClick={() => callModal(row.id)}>
@@ -199,6 +223,22 @@ export function EnhancedPosts() {
             setShowModal(false);
           }}
         />
+        <Fab
+          variant="extended"
+          style={{
+            margin: 0,
+            top: "auto",
+            right: 20,
+            bottom: 20,
+            left: "auto",
+            position: "fixed",
+          }}
+          color="primary"
+          onClick={() => backUPData.refetch()}
+        >
+          <FileDownloadIcon sx={{ mr: 1 }} />
+          Backup
+        </Fab>
       </Paper>
     );
   };
@@ -225,14 +265,14 @@ export function EnhancedPosts() {
 
   const handleError = (error: unknown) => {
     if (error instanceof APIResponseErr) {
-      setToastmsg(error.message)
+      setToastmsg(error.message);
     } else {
-      setToastmsg('Something went wrong')
+      setToastmsg("Something went wrong");
     }
-    setToastColor('error')
-    setOpen(true)
-    return <></>
-  }
+    setToastColor("error");
+    setOpen(true);
+    return <></>;
+  };
   return (
     <Paper>
       {isSuccess ? renderRoutes(data) : null}

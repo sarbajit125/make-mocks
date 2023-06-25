@@ -9,6 +9,7 @@ import { useMutation, useQuery, useQueryClient } from "react-query";
 import EnhancedForm from "../../components/EnhancedForm";
 import ShowToast from "../../components/showToast";
 import { RoutePageContext } from "../../contexts/pageContext";
+import Head from "next/head";
 
 export default function Blog() {
   const router = useRouter();
@@ -93,6 +94,9 @@ export default function Blog() {
   };
   return(
     <Paper>
+      <Head>
+        <title>Make Mocks</title>
+      </Head>
       <ResponsiveAppBar items={navLinks} />
       <EnhancedForm
             post={mockDetails}

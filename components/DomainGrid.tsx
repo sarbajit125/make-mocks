@@ -16,11 +16,13 @@ import {
   Backdrop,
   CircularProgress,
   AlertColor,
+  Fab,
 } from "@mui/material";
+import FileDownloadIcon from '@mui/icons-material/FileDownload';
 import Link from "next/link";
 import { Formik } from "formik";
 import * as yup from "yup";
-import { useMutation, useQueryClient } from "react-query";
+import { useMutation, useQuery, useQueryClient } from "react-query";
 import { APIResponseErr, CreateDomainReq, DomainDTO } from "../DTO/components";
 import { APIManager } from "../api/apiManager";
 import { useRouter } from "next/router";
@@ -71,6 +73,28 @@ function DomainGrid({ list }: DomainGridProps) {
       },
     }
   );
+  const backUPData = useQuery({
+    queryKey:["backupDomain"],
+    queryFn: () => APIManager.sharedInstance().backupDomains(),
+    onSuccess: (data) => {
+      // this works and prompts for download
+      var link = document.createElement('a')  // once we have the file buffer BLOB from the post request we simply need to send a GET request to retrieve the file data
+      link.href = window.URL.createObjectURL(data)
+      link.download = "Domains.json"
+      link.click()
+      link.remove();  //afterwards we remove the element 
+    },
+    onError: (err) => {
+      setToastMsg(
+        err instanceof APIResponseErr
+          ? err.message
+          : "Something went wrong"
+      );
+      setToastColor("error");
+      setShowToast(true);
+    },
+    enabled: false
+  })
   const validationSchema = yup.object({
     id: yup
       .string()
@@ -259,6 +283,17 @@ function DomainGrid({ list }: DomainGridProps) {
           onCrossClick={handleToastClose}
         />
       ) : null}
+      <Fab variant="extended" style={{
+          margin: 0,
+          top: 'auto',
+          right: 20,
+          bottom: 20,
+          left: 'auto',
+          position: 'fixed',
+      }} color='primary' onClick={() => (backUPData.refetch())}>
+        <FileDownloadIcon sx={{ mr: 1 }} />
+        Backup
+      </Fab>
     </div>
   );
 }
