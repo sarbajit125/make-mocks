@@ -22,11 +22,21 @@ export default function Home({list}: InferGetServerSidePropsType<typeof getServe
 export const getServerSideProps: GetServerSideProps<{
   list: DomainDTO[]
 }> = async () => {
-  const response = await prisma.domains.findMany();
-  const list: DomainDTO[] = response.map((item) => ({
-    desc: item.desc ?? "",
-    name: item.name,
-    id: item.id,
-  }));
-  return { props: { list } };
+  try {
+    const response = await prisma.domains.findMany();
+    const list: DomainDTO[] = response.map((item) => ({
+      desc: item.desc ?? "",
+      name: item.name,
+      id: item.id,
+    }));
+    return { props: { list } };
+  } catch (error) {
+    return {
+      redirect:{
+        destination: '/500',
+        permanent: false
+      }
+    }
+  }
+ 
 }

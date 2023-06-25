@@ -20,16 +20,25 @@ function Mocks() {
   );
 }
 export async function getServerSideProps(context: { query: { id: string } }) {
-  let domainId = context.query.id;
-  const queryClient = new QueryClient();
-  await queryClient.prefetchQuery({
-    queryKey: ["mocks", 1, 5, domainId],
-    queryFn: () => APIManager.sharedInstance().getAllRoutes(1, 5, domainId),
-  });
-  return {
-    props: {
-      dehydratedState: dehydrate(queryClient),
-    },
-  };
+  try {
+    let domainId = context.query.id;
+    const queryClient = new QueryClient();
+    await queryClient.prefetchQuery({
+      queryKey: ["mocks", 1, 5, domainId],
+      queryFn: () => APIManager.sharedInstance().getAllRoutes(1, 5, domainId),
+    });
+    return {
+      props: {
+        dehydratedState: dehydrate(queryClient),
+      },
+    };
+  } catch (error) {
+    return {
+      redirect:{
+        destination: '/500',
+        permanent: false
+      }
+    }
+  }
 }
 export default Mocks;
