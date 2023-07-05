@@ -6,7 +6,8 @@
     "dev": "next dev -p 8080",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "migrate:start": "npx prisma db push && node server.js"
   },
   "dependencies": {
     "@emotion/react": "^11.10.5",
