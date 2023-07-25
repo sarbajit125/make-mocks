@@ -14,12 +14,14 @@ import {
   SuccessResponse,
 } from "../DTO/components";
 import Cookies from "js-cookie";
+import getConfig from 'next/config'
 export class APIManager {
   private static instance: APIManager;
   axiosInstance: AxiosInstance;
   private constructor() {
+    const { publicRuntimeConfig: config } = getConfig()
     this.axiosInstance = axios.create({
-      baseURL: process.env.middilewareURL || "http://localhost:3000/",
+      baseURL: config.NEXT_BASE_URL || "http://localhost:3000/",
     });
     this.axiosInstance.interceptors.response.use((response) => {
       console.log("Response recived", JSON.stringify(response.data, null, 2));
