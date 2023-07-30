@@ -14,14 +14,12 @@ import {
   SuccessResponse,
 } from "../DTO/components";
 import Cookies from "js-cookie";
-import getConfig from 'next/config'
 export class APIManager {
   private static instance: APIManager;
   axiosInstance: AxiosInstance;
   private constructor() {
-    const { publicRuntimeConfig: config } = getConfig()
+    console.log(process.env.NEXT_PUBLIC_BASE_URL)
     this.axiosInstance = axios.create({
-      baseURL: config.NEXT_BASE_URL || "http://localhost:3000/",
     });
     this.axiosInstance.interceptors.response.use((response) => {
       console.log("Response recived", JSON.stringify(response.data, null, 2));
@@ -40,7 +38,7 @@ export class APIManager {
     domain: string
   ): Promise<RoutesResponse> {
     return this.axiosInstance
-      .get<RoutesResponse>("api/fetchAllRoutes", {
+      .get<RoutesResponse>("/api/fetchAllRoutes", {
         params: {
           page: page_number,
           size: page_size,
@@ -61,7 +59,7 @@ export class APIManager {
   async deleteRoute(id: string): Promise<SuccessResponse> {
     try {
       const response = await this.axiosInstance
-        .delete<SuccessResponse>("api/deleteARoute", {
+        .delete<SuccessResponse>("/api/deleteARoute", {
           params: { id: id },
         });
       return response.data;
@@ -71,7 +69,7 @@ export class APIManager {
   }
   async createRoute(routeObj: RouteDetails): Promise<SuccessResponse> {
     return this.axiosInstance
-      .post<SuccessResponse>("api/addARoute", routeObj)
+      .post<SuccessResponse>("/api/addARoute", routeObj)
       .then((response) => response.data)
       .catch((error) => {
         throw this.handleCatchedError(error);
@@ -82,7 +80,7 @@ export class APIManager {
     try {
       console.log(routeOj);
       const response = await this.axiosInstance.put<SuccessResponse>(
-        "api/updateARoute",
+        "/api/updateARoute",
         routeOj
       );
       if (response.status == 200) {
@@ -98,7 +96,7 @@ export class APIManager {
 
   async fetchTheRoute(id: String): Promise<RouteDetails> {
     return this.axiosInstance
-      .get(`mocks/${id}`)
+      .get(`/mocks/${id}`)
       .then((response) => {
         if (response.status == 200) {
           return Promise.resolve(response.data.route as RouteDetails);
@@ -113,7 +111,7 @@ export class APIManager {
   }
   async fetchRouteheaders(id: string) : Promise<HeadersResponse> {
     try {
-      const result = await this.axiosInstance.get<HeadersResponse>('api/fetchAllHeaders', {
+      const result = await this.axiosInstance.get<HeadersResponse>('/api/fetchAllHeaders', {
         params:{
           id: id
         }
@@ -178,7 +176,7 @@ export class APIManager {
   async setAdomain(domainReq: CreateDomainReq) {
     try {
       const response = await this.axiosInstance.post<SuccessResponse>(
-        "api/addADomain",
+        "/api/addADomain",
         domainReq
       );
       return response.data;
@@ -188,7 +186,7 @@ export class APIManager {
   }
   async backupDomains() {
     try {
-      const response = await this.axiosInstance.get("api/download/domains", {
+      const response = await this.axiosInstance.get("/api/download/domains", {
         responseType:'blob',
       })
       return response.data
@@ -198,7 +196,7 @@ export class APIManager {
   }
   async backupRoutes(domain: string) {
     try {
-      const response = await this.axiosInstance.get("api/download/routes", {
+      const response = await this.axiosInstance.get("/api/download/routes", {
         responseType:'blob',
         params:{
           domain: domain
@@ -212,7 +210,7 @@ export class APIManager {
   async deleteDomain(id: string) {
     try {
       const response = await this.axiosInstance.delete<SuccessResponse>(
-        "api/deleteADomain",
+        "/api/deleteADomain",
         { params: { id: id } }
       );
       return response.data;
