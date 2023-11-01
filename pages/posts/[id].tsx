@@ -37,7 +37,8 @@ export default function Blog() {
       setOpen(true)
       setToastmsg(data.message)
       setToastColor("success")
-      queryClient.invalidateQueries({ queryKey: ['post', 'mocks']});
+      queryClient.invalidateQueries("mocks");
+      queryClient.invalidateQueries("post");
       
     },
     onError(error, _variables, _context) {
