@@ -75,25 +75,25 @@ export function EnhancedPosts() {
     searchTxt
   );
   const backUPData = useQuery({
-      queryKey: ["downloadRoutes", data?.domain],
-      enabled: false,
-      queryFn: () => APIManager.sharedInstance().backupRoutes(data?.domain ?? ""),
-      onSuccess: (data) => {
-        // this works and prompts for download
-        var link = document.createElement("a"); // once we have the file buffer BLOB from the post request we simply need to send a GET request to retrieve the file data
-        link.href = window.URL.createObjectURL(data);
-        link.download = "Routes.json";
-        link.click();
-        link.remove(); //afterwards we remove the element
-      },
-      onError: (err) => {
-        setToastmsg(
-          err instanceof APIResponseErr ? err.message : "Something went wrong"
-        );
-        setToastColor("error");
-        setOpen(true);
-      },
-    });
+    queryKey: ["downloadRoutes", data?.domain],
+    enabled: false,
+    queryFn: () => APIManager.sharedInstance().backupRoutes(data?.domain ?? ""),
+    onSuccess: (data) => {
+      // this works and prompts for download
+      var link = document.createElement("a"); // once we have the file buffer BLOB from the post request we simply need to send a GET request to retrieve the file data
+      link.href = window.URL.createObjectURL(data);
+      link.download = "Routes.json";
+      link.click();
+      link.remove(); //afterwards we remove the element
+    },
+    onError: (err) => {
+      setToastmsg(
+        err instanceof APIResponseErr ? err.message : "Something went wrong"
+      );
+      setToastColor("error");
+      setOpen(true);
+    },
+  });
   const [open, setOpen] = useState(false);
   const [toastMsg, setToastmsg] = useState("");
   const [toastColor, setToastColor] = useState<AlertColor>("success");
@@ -136,7 +136,7 @@ export function EnhancedPosts() {
                 <Button
                   variant="contained"
                   startIcon={<AddIcon />}
-                  sx={{ whiteSpace: "nowrap" }}
+                  sx={{ whiteSpace: "nowrap", mr: 2 }}
                   onClick={() => {
                     toggleIsCreate(true);
                     setMockCuid(uuidv4());
@@ -155,6 +155,14 @@ export function EnhancedPosts() {
                 </Button>
               </Link>
             </Tooltip>
+            <Button
+              variant="contained"
+              startIcon={<FileDownloadIcon />}
+              color="warning"
+              onClick={() => backUPData.refetch()}
+            >
+              Backup
+            </Button>
           </Box>
         </Toolbar>
         <TableContainer>
@@ -223,22 +231,6 @@ export function EnhancedPosts() {
             setShowModal(false);
           }}
         />
-        <Fab
-          variant="extended"
-          style={{
-            margin: 0,
-            top: "auto",
-            right: 20,
-            bottom: 20,
-            left: "auto",
-            position: "fixed",
-          }}
-          color="primary"
-          onClick={() => backUPData.refetch()}
-        >
-          <FileDownloadIcon sx={{ mr: 1 }} />
-          Backup
-        </Fab>
       </Paper>
     );
   };

@@ -1,4 +1,4 @@
-import { APIErrUi, APIResponseErr, ResponseStatus, RouteDetails } from "../../DTO/components";
+import { APIErrUi, APIResponseErr, ResponseStatus, RouteDetails, UploadRouteDetails } from "../../DTO/components";
 import type { NextApiRequest, NextApiResponse } from "next";
 import { File } from "formidable";
 import { asyncParse } from "./uploadDomains";
@@ -20,7 +20,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       const reader = await readFile(fileArr[0].filepath, {
         encoding: "utf8",
       });
-      const array = JSON.parse(reader) as RouteDetails[];
+      const array = JSON.parse(reader) as UploadRouteDetails[];
       const mapResponse: String[] =  await  Promise.all(array.map(async (item) => {
         const mapResult = await prisma.post.create({
           data: {
@@ -29,11 +29,11 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
             response: item.response,
             title: item.title,
             id: item.id,
-            mockURL: "/" + item.domain + item.endpoint,
+            mockURL: item.mockURL,
             type: item.type as keyof typeof HttpType,
             domain:{
               connect:{
-                name: item.domain
+                name: item.domainName
               }
             }
           }

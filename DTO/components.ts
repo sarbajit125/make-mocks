@@ -10,6 +10,17 @@ export interface RouteDetails {
   headers?: HeaderTableModel[];
   domain: string;
 }
+export interface UploadRouteDetails {
+  id: string;
+  title: string;
+  endpoint: string;
+  type: string;
+  response: string;
+  statusCode: number;
+  headers?: HeaderTableModel[];
+  domainName: string;
+  mockURL: string
+}
 export enum ResponseStatus {
   Success,
   Failure,

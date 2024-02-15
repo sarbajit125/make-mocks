@@ -23,7 +23,7 @@ export default async function handler(
             headers: true
           }
         });
-        res.setHeader("Content-Type", "application/pdf");
+        res.setHeader("Content-Type", "application/json");
         res.setHeader(
           "Content-Disposition",
           "attachment; filename=routes.json"
