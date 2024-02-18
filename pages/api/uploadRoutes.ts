@@ -21,25 +21,21 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         encoding: "utf8",
       });
       const array = JSON.parse(reader) as UploadRouteDetails[];
-      const mapResponse: String[] =  await  Promise.all(array.map(async (item) => {
-        const mapResult = await prisma.post.create({
-          data: {
-            endpoint: item.endpoint,
-            statusCode: item.statusCode,
-            response: item.response,
-            title: item.title,
-            id: item.id,
-            mockURL: item.mockURL,
-            type: item.type as keyof typeof HttpType,
-            domain:{
-              connect:{
-                name: item.domainName
-              }
-            }
-          }
-        });
-        return mapResult.id;
-      })) 
+      console.log("Upload started")
+      const enteredData = await prisma.post.createMany({
+        data: array.map((item) => ({
+          endpoint: item.endpoint,
+          statusCode: item.statusCode,
+          response: item.response,
+          title: item.title,
+          id: item.id,
+          mockURL: item.mockURL,
+          type: item.type as keyof typeof HttpType,
+          domainName: item.domainName
+        })),
+        skipDuplicates: true,
+      })
+      console.log("Upload complete")
       // const response = await prisma.post.createMany({
       //   skipDuplicates: true,
       //   data: array.map((item) => (
@@ -58,7 +54,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       res.status(201).json({
         "message": "Upload successful and routes created",
         "timeStamp": new Date().toString(),
-        "successCount": mapResponse.length
+        "successCount": enteredData.count
       })
 
     } else {
