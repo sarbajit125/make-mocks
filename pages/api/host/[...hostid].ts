@@ -37,9 +37,9 @@ export default async function handler(
                     res.setHeader(item.key, item.value)
                 ))
             }
-            return res.status(response.statusCode).json(response.response)
+            return res.status(response.statusCode).json(JSON.parse(response.response))
         } else {
-            throw new APIResponseErr(400, ResponseStatus.Failure, new Date().toString(), "Only domain is insufficent")
+            throw new APIResponseErr(400, ResponseStatus.Failure, new Date().toString(), "Only domain is insufficient")
         }
 
     } catch (error) {
